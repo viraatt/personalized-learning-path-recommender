@@ -1,16 +1,156 @@
-# React + Vite
+# AI-Powered Personalized Learning Path Recommender
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An AI-powered assistant that understands a learner's goals, interests, and
+experience level, identifies skill gaps, and generates a structured,
+explainable, adaptive learning roadmap — built for [Hackathon Name].
 
-Currently, two official plugins are available:
+See `docs/PROJECT_BRIEF.md` for the full problem statement, deliverables,
+and judging criteria.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Conversational intake — describe your learning goals in plain English
+- Learner profiling engine — captures interests, experience level,
+  completed courses, and objectives
+- AI-powered recommendation engine — retrieves relevant courses via
+  semantic search over a curated course/skill catalog
+- Personalized path generator — sequences recommendations using a
+  prerequisite graph, with milestones
+- Explainability — every recommendation comes with a grounded rationale
+  tied to your actual profile
+- Tutor Q&A — ask "why this" or "why not that" about your path
+- Adaptive feedback loop — mark progress or rate a course, and the
+  remaining path re-sequences based on updated skill mastery
+- Dashboard — profile summary, skill progress chart, path timeline,
+  next recommended action
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+See `docs/SCOPE.md` for what is explicitly in and out of scope.
 
-## Expanding the Oxlint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| Layer | Choice |
+|---|---|
+| Frontend | Vite + React 18 + JavaScript |
+| UI | shadcn/ui (Radix UI) + Tailwind CSS |
+| Charts | Recharts |
+| State | Zustand + TanStack Query |
+| Backend | Supabase Edge Functions (Deno) |
+| Database | Supabase Postgres + pgvector |
+| Auth | Supabase Auth |
+| LLM + Embeddings | Google Gemini 2.5 Flash + `text-embedding-004` |
+
+Full architecture details in `docs/ARCHITECTURE.md`.
+
+## Prerequisites
+
+- Node.js 18+ and npm
+- A free [Supabase](https://supabase.com) account and project
+- A free [Google AI Studio](https://aistudio.google.com) API key (for Gemini)
+- The [Supabase CLI](https://supabase.com/docs/guides/cli) (`npm install -g supabase`)
+
+## Local Setup
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/<your-username>/personalized-learning-path-recommender.git
+   cd personalized-learning-path-recommender
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Fill in `.env` with your Supabase project values (Dashboard → Settings → API):
+
+   ```
+   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+   VITE_SUPABASE_ANON_KEY=sb_publishable_...
+   ```
+
+4. **Link the Supabase CLI to your project**
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref your-project-ref
+   ```
+
+5. **Apply database migrations**
+
+   ```bash
+   npx supabase db push
+   ```
+
+6. **Set your Gemini API key as a Supabase secret** (used by edge functions)
+
+   ```bash
+   npx supabase secrets set GEMINI_API_KEY=your-gemini-key
+   ```
+
+7. **Deploy edge functions to your Supabase project**
+
+   ```bash
+   npx supabase functions deploy
+   ```
+
+8. **Run the frontend locally**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:5173](http://localhost:5173).
+
+## Project Structure
+
+```
+src/
+  components/    UI components (intake, path, dashboard, tutor)
+  hooks/         Data-fetching hooks (profile, path, progress)
+  lib/           Supabase client, shared helpers
+  pages/         Route-level pages
+  store/         Zustand stores
+supabase/
+  migrations/    SQL schema migrations
+  functions/     Edge functions (profiling, retrieval, path generation,
+                 explanation, tutor chat, progress updates)
+scripts/         Catalog seeding and embedding generation scripts
+docs/            Project brief, scope, architecture, progress tracker
+```
+
+Full breakdown in `docs/ARCHITECTURE.md`.
+
+## Seeding the Course Catalog
+
+```bash
+node scripts/seed-catalog.js
+node scripts/embed-catalog.js
+```
+
+(Run after migrations are applied — populates the `courses` table and
+generates embeddings for semantic search.)
+
+## Development Notes
+
+This project was built solo, agent-assisted, over a 6-day sprint
+(Aug 22–27). See `docs/PROGRESS.md` for the full phase-by-phase build log
+and commit history for development progression.
+
+Architecture patterns (edge function structure, AI provider abstraction)
+were referenced from the open-source
+[AI Learning Path Generator](https://github.com/Enterprise-DNA-OS/ai-learning-path-generator)
+by Enterprise DNA (MIT licensed). Core recommendation logic, path-generation
+algorithm, explanation prompts, and the adaptive feedback loop were built
+independently for this project.
+
+## License
+
+MIT
