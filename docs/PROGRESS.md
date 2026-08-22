@@ -14,7 +14,7 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 1: Repo & Environment
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 1.1 | Init repo, selective-copy shadcn/ui + ai-provider boilerplate, set folder structure | Not started | |
+| 1.1 | Init repo, selective-copy shadcn/ui + ai-provider boilerplate, set folder structure | Done | |
 | 1.2 | Supabase project created, `.env` configured | Not started | |
 | 1.3 | Apply trimmed base migrations, verify connection | Not started | |
 
