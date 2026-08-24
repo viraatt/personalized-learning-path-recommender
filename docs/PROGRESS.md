@@ -46,9 +46,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 5: Embeddings
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 5.1 | Enable pgvector, add embedding column migration | Not started | |
-| 5.2 | Script: generate embeddings for catalog courses (Gemini text-embedding-004) | Not started | |
-| 5.3 | Function: embed learner goal text on demand | Not started | |
+| 5.1 | Enable pgvector, add embedding column migration | Done | pgvector + `courses.embedding vector(768)` already existed from earlier migrations. Added `20260824165000_embedding_indexes.sql` with an HNSW index (`vector_cosine_ops`) on the embedding column for Phase 6 similarity search. Not applied to remote yet — `db push` needs live DB credentials (run in buffer/deploy step). |
+| 5.2 | Script: generate embeddings for catalog courses (Gemini text-embedding-004) | Done | `scripts/embed-catalog.js`: fetches all courses, embeds a title+domain+difficulty+description+skills blob per course via Gemini REST, updates `courses.embedding` (service-role). Idempotent. Needs `GEMINI_API_KEY` in .env to run — not present locally yet (key lives as a Supabase secret), so live run deferred. Syntax + lint clean. |
+| 5.3 | Function: embed learner goal text on demand | Done | `supabase/functions/embed-goal/index.js`: accepts `{ text }`, returns the 768-dim embedding via shared `_shared/ai.js` embed(). Consumed by Phase 6 retrieval. Syntax + lint clean; deploy deferred to buffer (per SCOPE). |
 
 ### Phase 6: Retrieval + Skill Gaps
 | # | Sub-phase | Status | Notes |
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 5.1–5.3 (embeddings) | Cline (agent) | Added HNSW index migration, `scripts/embed-catalog.js` (needs local GEMINI_API_KEY to run), and `embed-goal` edge function reusing `ai.embed`. Syntax + lint clean; live run/deploy deferred. | Phase 6: retrieval + skill gaps (similarity search over courses.embedding + skill-gap computation from profile). |
 | Aug 24 | 4.3 (display profile) | Cline (agent) | Added getProfile hook + ProfileDisplay card; IntakeChat loads saved profile on mount and shows structured card after parse. Build + lint clean. | Day 3 / Phase 5: embeddings (pgvector column exists; add embed-catalog script + ai.embed via text-embedding-004). |
 | Aug 24 | 4.2 (persist profile) | Cline (agent) | parse-profile upserts to learner_profiles (RLS-scoped via JWT) via new `_shared/supabase.js`; maps course titles->UUIDs. Syntax + lint clean. | Phase 4.3: retrieve + display profile in UI, verify parsing accuracy. |
 | Aug 24 | 4.1 (real Gemini profiling) | Cline (agent) | Replaced stub parse-profile with Gemini call via new `_shared/ai.js`; JSON-schema mode + runtime validation. Validated via syntax check + stubbed smoke test. | Phase 4.2: persist parsed profile to `learner_profiles` (map completed_course titles -> course UUIDs). |
