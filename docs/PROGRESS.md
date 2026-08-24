@@ -30,7 +30,7 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 3: Chat Intake UI
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 3.1 | Chat/form component skeleton | Not started | |
+| 3.1 | Chat/form component skeleton | Done | `src/components/intake/IntakeChat.jsx` single chat form (no wizard, per SCOPE), local message state only — no backend yet. Added `src/lib/utils.js` (`cn` helper). Replaced Vite boilerplate App.jsx; neutralized centered `#root` CSS. Build passes, oxlint clean. |
 | 3.2 | Wire input to backend call (stubbed response first) | Not started | |
 | 3.3 | Loading/error UI states | Not started | |
 
@@ -125,4 +125,5 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
-| Aug 24 | 2.3 (seed script) | Cline (agent) | Built + ran `scripts/seed-catalog.js` (13 courses, 14 edges), verified persisted. Build passes. | Phase 3.1: chat intake UI skeleton. Note: 2.1/2.2 Done marks were pre-existing uncommitted edits (now committed together). |
+| Aug 24 | 3.1 (chat skeleton) | Cline (agent) | Added `IntakeChat.jsx` skeleton + `lib/utils.js` `cn` helper; replaced boilerplate app. Build + lint pass. | Phase 3.2: wire input to profiling backend call (stub first). |
+| Aug 24 | 2.3 (seed script) | Cline (agent) | Built + ran `scripts/seed-catalog.js` (13 courses, 14 edges), verified persisted. Build passes. | Phase 3.1 was next. Note: 2.1/2.2 Done marks were pre-existing uncommitted edits (committed with 2.3). |
