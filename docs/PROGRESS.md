@@ -37,7 +37,7 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 4: Profiling Logic
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 4.1 | Edge function: Gemini parses chat -> structured profile JSON | Not started | |
+| 4.1 | Edge function: Gemini parses chat -> structured profile JSON | Done | Replaced stub in `supabase/functions/parse-profile/index.js` with real Gemini call via new shared `supabase/functions/_shared/ai.js` (REST chat + embed, retry/backoff, JSON-schema mode). Runtime shape validation (no TS). `completed_courses` returned as titles (strings) — mapped to UUIDs at persist (4.2). Deferred deploys; validated via node --check + stubbed-fetch smoke test of JSON path. |
 | 4.2 | Persist profile to DB | Not started | |
 | 4.3 | Retrieve + display profile in UI, verify parsing accuracy | Not started | |
 
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 4.1 (real Gemini profiling) | Cline (agent) | Replaced stub parse-profile with Gemini call via new `_shared/ai.js`; JSON-schema mode + runtime validation. Validated via syntax check + stubbed smoke test. | Phase 4.2: persist parsed profile to `learner_profiles` (map completed_course titles -> course UUIDs). |
 | Aug 24 | 3.3 (loading/error states) | Cline (agent) | Added status state + spinner + error banner + form disable to IntakeChat. Build + lint clean. | Phase 4.1: parse-profile edge function (real Gemini via _shared/aiProvider). |
 | Aug 24 | 3.2 (backend wiring, stub) | Cline (agent) | Added `submitIntake` hook + stub `parse-profile` edge function + `_shared/cors.js`; wired IntakeChat. Build + lint clean. Function deploy deferred to buffer. | Phase 3.3: loading/error UI states. |
 | Aug 24 | 3.1 (chat skeleton) | Cline (agent) | Added `IntakeChat.jsx` skeleton + `lib/utils.js` `cn` helper; replaced boilerplate app. Build + lint pass. | Phase 3.2: wire input to profiling backend call (stub first). |
