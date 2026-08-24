@@ -78,9 +78,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 9: Explainability
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 9.1 | Per-step grounded "why recommended" generation function | Not started | |
-| 9.2 | Frontend: explanation card per step | Not started | |
-| 9.3 | Sanity-check grounding on 5+ test profiles | Not started | |
+| 9.1 | Per-step grounded "why recommended" generation function | Done | `_shared/grounding.js` builds explicit learner/course fact lists; new `explain-step` edge function (`{ pathId, stepId? }`) generates a 2-3 sentence rationale via `ai.chat` JSON-schema mode, instructed to use ONLY those facts, and persists to `path_steps.rationale_text` (RLS). Batch mode covers all unexplained steps. |
+| 9.2 | Frontend: explanation card per step | Done | `src/hooks/path/explainSteps.js` hook + "Why these picks?" button in `PathTimeline`; rationale renders as a bordered card per step ("Why this: …"), showing persisted `rationale_text` on load too. |
+| 9.3 | Sanity-check grounding on 5+ test profiles | Done (static) | Node smoke test across 6 synthetic profiles: empty profile -> zero facts, no `undefined`/`[object Object]` leakage, completed-course titles included, step facts fallback correct. Live LLM grounding review deferred to buffer deploys. Build EXIT=0, oxlint 0/0. |
 
 ### Phase 10: Tutor + Adaptive Loop
 | # | Sub-phase | Status | Notes |
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 9.1–9.3 (explainability) | Cline (agent) | Added `_shared/grounding.js` + `explain-step` function (persisting rationales), explanation cards in PathTimeline, grounding smoke-tested on 6 profiles. NOT pushed — user pushes manually. | Phase 10: tutor chat (10.1), progress tracking UI + DB writes (10.2), mastery update -> path re-run (10.3). |
 | Aug 24 | 8.1–8.3 (path persistence + timeline UI) | Cline (agent) | generate-path persists path+steps; added getPath hook + PathTimeline with milestone markers. Build EXIT=0, lint clean. NOT pushed — user pushes manually. | Day 5 / Phase 9: explainability (per-step grounded rationale via explain-step function + explanation cards). |
 | Aug 24 | 7.1–7.3 (graph logic) | Cline (agent) | Added `_shared/pathGraph.js` (topoSort, resolvePathOrder, groupIntoMilestones — smoke-tested) + `generate-path` edge function returning ordered, milestone-grouped path JSON. Persistence next. | Phase 8: persist generated path to learning_paths/path_steps (8.1), then timeline UI (8.2–8.3). |
 | Aug 24 | 6.1–6.3 (retrieval + skill gaps) | Cline (agent) | Added match_courses RPC migration, `_shared/skillGap.js` (smoke-tested), `retrieve-courses` edge function integrating profile->embedding->similarity->gaps. Live run deferred to buffer. | Day 4 / Phase 7: graph logic — topological sort over prerequisite DAG, merge retrieval results into DAG. |

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getPath } from '@/hooks/path/getPath'
+import { explainSteps } from '@/hooks/path/explainSteps'
 import { cn } from '@/lib/utils'
 
 const STATUS_STYLES = {
@@ -10,13 +11,14 @@ const STATUS_STYLES = {
 
 /**
  * PathTimeline — renders the learner's saved path as a vertical timeline
- * (8.2) grouped under milestone markers (8.3). Loads its own data.
- * Loading/error are derived states, so no setState happens synchronously
- * inside the effect.
+ * (8.2) grouped under milestone markers (8.3), with grounded explanation
+ * cards per step (9.2). Loading/error are derived states.
  */
 export default function PathTimeline() {
   const [path, setPath] = useState(null)
   const [failed, setFailed] = useState(false)
+  const [rationales, setRationales] = useState({})
+  const [explainState, setExplainState] = useState('idle') // idle|loading|error
 
   useEffect(() => {
     let cancelled = false
@@ -33,6 +35,17 @@ export default function PathTimeline() {
   }, [])
 
   const loading = !failed && path === null
+
+  function handleExplain() {
+    if (!path || explainState === 'loading') return
+    setExplainState('loading')
+    void explainSteps(path.id)
+      .then((explanations) => {
+        setRationales((prev) => ({ ...prev, ...explanations }))
+        setExplainState('idle')
+      })
+      .catch(() => setExplainState('error'))
+  }
 
   if (loading) {
     return (
@@ -65,9 +78,25 @@ export default function PathTimeline() {
       aria-label="Your learning path"
       className="rounded-lg border bg-background p-4 text-left"
     >
-      <h2 className="mb-4 text-lg font-semibold tracking-tight">
-        Your learning path
-      </h2>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Your learning path
+        </h2>
+        <button
+          type="button"
+          onClick={handleExplain}
+          disabled={explainState === 'loading'}
+          className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-opacity hover:bg-muted disabled:opacity-50"
+        >
+          {explainState === 'loading' ? 'Explaining…' : 'Why these picks?'}
+        </button>
+      </div>
+
+      {explainState === 'error' && (
+        <p role="alert" className="mb-3 text-sm text-destructive">
+          Could not generate explanations. Please try again.
+        </p>
+      )}
 
       <ol className="flex flex-col gap-6">
         {milestones.map((milestone, mIndex) => (
@@ -125,6 +154,14 @@ export default function PathTimeline() {
                         </span>
                       ))}
                     </div>
+
+                    {/* Grounded explanation card (9.2). */}
+                    {(rationales[step.id] || step.rationale_text) && (
+                      <p className="mt-3 rounded-md border-l-2 border-primary/40 bg-background px-3 py-2 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Why this: </span>
+                        {rationales[step.id] ?? step.rationale_text}
+                      </p>
+                    )}
                   </div>
                 </li>
               ))}
