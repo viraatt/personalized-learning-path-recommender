@@ -94,9 +94,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 11: Dashboard
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 11.1 | Skill radar/bar chart wired to mastery data | Not started | |
-| 11.2 | "Next recommended action" widget | Not started | |
-| 11.3 | Full UI polish pass (loading/error/empty states across app) | Not started | |
+| 11.1 | Skill radar/bar chart wired to mastery data | Done | `src/components/dashboard/SkillChart.jsx`: Recharts bar chart over `skill_mastery` (via new `getMastery` hook), 0–100 domain, angled labels, empty/loading/error states. |
+| 11.2 | "Next recommended action" widget | Done | `src/components/dashboard/NextAction.jsx`: first incomplete step of latest path (title, milestone, difficulty, duration); handles no-path, all-complete ("🎉"), loading, error. |
+| 11.3 | Full UI polish pass (loading/error/empty states across app) | Done | PathTimeline silent-null replaced with explicit empty-state card; verified every section has loading/error/empty handling. Build EXIT=0, oxlint 0/0. Note: bundle >500 kB warning after adding Recharts (non-fatal; code-splitting optional in buffer). |
 
 ### Phase 12: Packaging
 | # | Sub-phase | Status | Notes |
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 11.1–11.3 (dashboard) | Cline (agent) | Added SkillChart (Recharts over skill_mastery), NextAction widget, empty-state polish in PathTimeline. Build EXIT=0, lint clean. NOT pushed — user pushes manually. | Phase 12: end-to-end QA (needs deploys), README/docs finalization, ZIP export + final commit. |
 | Aug 24 | 10.1–10.3 (tutor + adaptive loop) | Cline (agent) | Added grounded `tutor-chat` function + widget, step rating migration + progress controls, mastery upserts and re-sequence action. NOT pushed — user pushes manually. | Phase 11: dashboard (skill chart wired to skill_mastery, next-action widget, polish pass). |
 | Aug 24 | 9.1–9.3 (explainability) | Cline (agent) | Added `_shared/grounding.js` + `explain-step` function (persisting rationales), explanation cards in PathTimeline, grounding smoke-tested on 6 profiles. NOT pushed — user pushes manually. | Phase 10: tutor chat (10.1), progress tracking UI + DB writes (10.2), mastery update -> path re-run (10.3). |
 | Aug 24 | 8.1–8.3 (path persistence + timeline UI) | Cline (agent) | generate-path persists path+steps; added getPath hook + PathTimeline with milestone markers. Build EXIT=0, lint clean. NOT pushed — user pushes manually. | Day 5 / Phase 9: explainability (per-step grounded rationale via explain-step function + explanation cards). |

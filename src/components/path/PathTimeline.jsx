@@ -110,7 +110,13 @@ export default function PathTimeline({ onChanged }) {
     )
   }
 
-  if (!path || path.steps.length === 0) return null
+  if (!path || path.steps.length === 0) {
+    return (
+      <section className="rounded-lg border bg-background p-4 text-left text-sm text-muted-foreground">
+        No learning path yet — describe your goal above and I'll build one.
+      </section>
+    )
+  }
 
   // Group steps by milestone for the marker headers.
   const milestones = []
