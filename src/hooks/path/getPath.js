@@ -11,7 +11,7 @@ export async function getPath() {
     .select(
       `id, generated_at,
        path_steps (
-         id, course_id, order_index, milestone_group, status, rationale_text,
+         id, course_id, order_index, milestone_group, status, rating, rationale_text,
          courses ( title, description, difficulty, duration_hours, skills )
        )`
     )

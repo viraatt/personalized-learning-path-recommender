@@ -85,9 +85,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 10: Tutor + Adaptive Loop
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 10.1 | Tutor chat function (scoped to path/profile context) + frontend widget | Not started | |
-| 10.2 | Progress tracking UI (mark complete/rate) + DB writes | Not started | |
-| 10.3 | Mastery update -> re-run path generator, verify visible re-sequencing | Not started | |
+| 10.1 | Tutor chat function (scoped to path/profile context) + frontend widget | Done | `tutor-chat` edge function: grounded on profile facts (`_shared/grounding.js`) + actual ordered path steps; JSON-schema reply, honest fallback when context missing. `TutorChat.jsx` widget mounted in App with loading/error states. |
+| 10.2 | Progress tracking UI (mark complete/rate) + DB writes | Done | Migration `20260824171000_path_step_rating.sql` adds `path_steps.rating (1-5)`. Per-step controls in PathTimeline: Start / Mark complete buttons + 1-5 star rating, writing via RLS through `updateStepProgress` hook. |
+| 10.3 | Mastery update -> re-run path generator, verify visible re-sequencing | Done (static) | Completing a step grants +40 mastery per taught skill, rating grants 8/star (cap 100), upserted into `skill_mastery`. "Re-sequence path" button re-invokes `generate-path`, which drops completed courses and pulls unmet prereqs (ordering verified in Phase 7 smoke test). Live verification deferred to buffer deploys. Build EXIT=0, oxlint 0/0. |
 
 ## Day 6 (Aug 27) — Dashboard + Packaging
 
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 10.1–10.3 (tutor + adaptive loop) | Cline (agent) | Added grounded `tutor-chat` function + widget, step rating migration + progress controls, mastery upserts and re-sequence action. NOT pushed — user pushes manually. | Phase 11: dashboard (skill chart wired to skill_mastery, next-action widget, polish pass). |
 | Aug 24 | 9.1–9.3 (explainability) | Cline (agent) | Added `_shared/grounding.js` + `explain-step` function (persisting rationales), explanation cards in PathTimeline, grounding smoke-tested on 6 profiles. NOT pushed — user pushes manually. | Phase 10: tutor chat (10.1), progress tracking UI + DB writes (10.2), mastery update -> path re-run (10.3). |
 | Aug 24 | 8.1–8.3 (path persistence + timeline UI) | Cline (agent) | generate-path persists path+steps; added getPath hook + PathTimeline with milestone markers. Build EXIT=0, lint clean. NOT pushed — user pushes manually. | Day 5 / Phase 9: explainability (per-step grounded rationale via explain-step function + explanation cards). |
 | Aug 24 | 7.1–7.3 (graph logic) | Cline (agent) | Added `_shared/pathGraph.js` (topoSort, resolvePathOrder, groupIntoMilestones — smoke-tested) + `generate-path` edge function returning ordered, milestone-grouped path JSON. Persistence next. | Phase 8: persist generated path to learning_paths/path_steps (8.1), then timeline UI (8.2–8.3). |

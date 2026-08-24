@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getPath } from '@/hooks/path/getPath'
 import { explainSteps } from '@/hooks/path/explainSteps'
+import { updateStepProgress } from '@/hooks/progress/updateStepProgress'
+import { regeneratePath } from '@/hooks/progress/regeneratePath'
 import { cn } from '@/lib/utils'
 
 const STATUS_STYLES = {
@@ -10,15 +12,25 @@ const STATUS_STYLES = {
 }
 
 /**
- * PathTimeline — renders the learner's saved path as a vertical timeline
- * (8.2) grouped under milestone markers (8.3), with grounded explanation
- * cards per step (9.2). Loading/error are derived states.
+ * PathTimeline — timeline (8.2) + milestone markers (8.3) + explanation
+ * cards (9.2) + progress controls and adaptive re-sequencing (10.2/10.3).
  */
-export default function PathTimeline() {
+export default function PathTimeline({ onChanged }) {
   const [path, setPath] = useState(null)
   const [failed, setFailed] = useState(false)
   const [rationales, setRationales] = useState({})
   const [explainState, setExplainState] = useState('idle') // idle|loading|error
+  const [busyStepId, setBusyStepId] = useState(null)
+  const [resequencing, setResequencing] = useState(false)
+
+  const load = useCallback(async () => {
+    try {
+      const data = await getPath()
+      setPath(data)
+    } catch {
+      setFailed(true)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -45,6 +57,41 @@ export default function PathTimeline() {
         setExplainState('idle')
       })
       .catch(() => setExplainState('error'))
+  }
+
+  // 10.2 — persist status/rating, then fold skills into mastery (10.3).
+  async function handleProgress(step, patch) {
+    if (busyStepId) return
+    setBusyStepId(step.id)
+    try {
+      await updateStepProgress({
+        stepId: step.id,
+        skills: step.courses?.skills ?? [],
+        ...patch,
+      })
+      // Optimistic UI refresh from DB truth.
+      await load()
+      onChanged?.()
+    } catch {
+      /* surfaced via next render's DB state; keep silent to stay minimal */
+    } finally {
+      setBusyStepId(null)
+    }
+  }
+
+  // 10.3 — regenerate so remaining steps re-sequence around new mastery.
+  async function handleResequence() {
+    if (resequencing) return
+    setResequencing(true)
+    try {
+      await regeneratePath()
+      await load()
+      onChanged?.()
+    } catch {
+      /* keep prior view on failure */
+    } finally {
+      setResequencing(false)
+    }
   }
 
   if (loading) {
@@ -89,6 +136,15 @@ export default function PathTimeline() {
           className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-opacity hover:bg-muted disabled:opacity-50"
         >
           {explainState === 'loading' ? 'Explaining…' : 'Why these picks?'}
+        </button>
+        <button
+          type="button"
+          onClick={handleResequence}
+          disabled={resequencing}
+          title="Regenerate the remaining path from your updated mastery"
+          className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-opacity hover:bg-muted disabled:opacity-50"
+        >
+          {resequencing ? 'Re-sequencing…' : 'Re-sequence path'}
         </button>
       </div>
 
@@ -162,6 +218,52 @@ export default function PathTimeline() {
                         {rationales[step.id] ?? step.rationale_text}
                       </p>
                     )}
+
+                    {/* Progress controls (10.2). */}
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                      {step.status !== 'in_progress' && step.status !== 'complete' && (
+                        <button
+                          type="button"
+                          disabled={busyStepId === step.id}
+                          onClick={() => handleProgress(step, { status: 'in_progress' })}
+                          className="rounded border px-2 py-1 font-medium hover:bg-background disabled:opacity-50"
+                        >
+                          Start
+                        </button>
+                      )}
+                      {step.status !== 'complete' && (
+                        <button
+                          type="button"
+                          disabled={busyStepId === step.id}
+                          onClick={() =>
+                            handleProgress(step, { status: 'complete', rating: step.rating ?? null })
+                          }
+                          className="rounded border px-2 py-1 font-medium hover:bg-background disabled:opacity-50"
+                        >
+                          Mark complete
+                        </button>
+                      )}
+                      <span className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            aria-label={`Rate ${star} of 5`}
+                            disabled={busyStepId === step.id}
+                            onClick={() => handleProgress(step, { rating: star })}
+                            className={cn(
+                              'px-0.5 text-sm',
+                              (step.rating ?? 0) >= star
+                                ? 'text-primary'
+                                : 'text-muted-foreground/40 hover:text-muted-foreground',
+                              busyStepId === step.id && 'opacity-50'
+                            )}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </span>
+                    </div>
                   </div>
                 </li>
               ))}
