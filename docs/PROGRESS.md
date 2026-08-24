@@ -39,7 +39,7 @@ next sub-phase should be. This file + `git log` are how a new agent session
 |---|---|---|---|
 | 4.1 | Edge function: Gemini parses chat -> structured profile JSON | Done | Replaced stub in `supabase/functions/parse-profile/index.js` with real Gemini call via new shared `supabase/functions/_shared/ai.js` (REST chat + embed, retry/backoff, JSON-schema mode). Runtime shape validation (no TS). `completed_courses` returned as titles (strings) — mapped to UUIDs at persist (4.2). Deferred deploys; validated via node --check + stubbed-fetch smoke test of JSON path. |
 | 4.2 | Persist profile to DB | Done | `parse-profile` now upserts into `learner_profiles` scoped to the caller's JWT (RLS) using new shared `_shared/supabase.js` (`createAuthedClient`). Maps `completed_courses` titles -> course UUIDs via service-role catalog lookup; unknown titles dropped. Returns `{ profile }` incl. `id`. Syntax-checked + oxlint clean. Deploy of functions deferred to buffer (per SCOPE). |
-| 4.3 | Retrieve + display profile in UI, verify parsing accuracy | Not started | |
+| 4.3 | Retrieve + display profile in UI, verify parsing accuracy | Done | Added `src/hooks/profile/getProfile.js` (reads `learner_profiles` via RLS) and `src/components/profile/ProfileDisplay.jsx` (goal, target role, experience, interests, completed courses). `IntakeChat` fetches saved profile on mount and shows the structured card after each parse (replacing the raw JSON blob). Build + lint clean. Live parity of LLM output pending function deploy (buffer). |
 
 ## Day 3 (Aug 24) — Recommendation Engine
 
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 4.3 (display profile) | Cline (agent) | Added getProfile hook + ProfileDisplay card; IntakeChat loads saved profile on mount and shows structured card after parse. Build + lint clean. | Day 3 / Phase 5: embeddings (pgvector column exists; add embed-catalog script + ai.embed via text-embedding-004). |
 | Aug 24 | 4.2 (persist profile) | Cline (agent) | parse-profile upserts to learner_profiles (RLS-scoped via JWT) via new `_shared/supabase.js`; maps course titles->UUIDs. Syntax + lint clean. | Phase 4.3: retrieve + display profile in UI, verify parsing accuracy. |
 | Aug 24 | 4.1 (real Gemini profiling) | Cline (agent) | Replaced stub parse-profile with Gemini call via new `_shared/ai.js`; JSON-schema mode + runtime validation. Validated via syntax check + stubbed smoke test. | Phase 4.2: persist parsed profile to `learner_profiles` (map completed_course titles -> course UUIDs). |
 | Aug 24 | 3.3 (loading/error states) | Cline (agent) | Added status state + spinner + error banner + form disable to IntakeChat. Build + lint clean. | Phase 4.1: parse-profile edge function (real Gemini via _shared/aiProvider). |

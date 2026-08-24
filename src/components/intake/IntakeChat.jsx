@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { submitIntake } from '@/hooks/profile/submitIntake'
+import { getProfile } from '@/hooks/profile/getProfile'
+import ProfileDisplay from '@/components/profile/ProfileDisplay'
 
 /**
- * IntakeChat — chat/form intake UI (Phases 3.1–3.3).
+ * IntakeChat — chat/form intake UI (Phases 3.1–3.3, 4.3).
  *
- * Renders a simple single-form/chat input and wires it to the `parse-profile`
- * edge function via `submitIntake`. Includes loading and error UI states. The
- * function returns a stub profile until Phase 4.1 adds real Gemini parsing.
+ * Renders a simple single-form/chat input wired to the `parse-profile` edge
+ * function. Includes loading/error state. After a successful parse, the
+ * resulting profile is persisted (4.2) and shown as a structured card (4.3).
+ * On mount, any previously saved profile is retrieved and displayed.
  *
  * Deliberately a single simple form (no multi-step wizard), per SCOPE.md's
  * OUT-OF-SCOPE note.
@@ -16,6 +19,22 @@ export default function IntakeChat() {
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState([])
   const [status, setStatus] = useState('idle')
+  const [profile, setProfile] = useState(null)
+
+  // Load any saved profile on mount.
+  useEffect(() => {
+    let cancelled = false
+    getProfile()
+      .then((saved) => {
+        if (!cancelled && saved) setProfile(saved)
+      })
+      .catch(() => {
+        /* no profile yet / not authenticated — fine */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -28,14 +47,13 @@ export default function IntakeChat() {
     setStatus('loading')
 
     void submitIntake(text)
-      .then((profile) => {
+      .then((parsed) => {
+        setProfile(parsed)
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            content:
-              'Thanks! Here is your parsed profile (stub for now): ' +
-              JSON.stringify(profile, null, 2),
+            content: 'Got it — I saved your learner profile. Update it any time below.',
           },
         ])
         setStatus('success')
@@ -64,6 +82,9 @@ export default function IntakeChat() {
           analyst and get comfortable with Python and machine learning.”
         </p>
       </header>
+
+      {/* Previously saved / just-parsed profile. */}
+      {profile && <ProfileDisplay profile={profile} />}
 
       {/* Message list — rendered as cards; empty until a message is sent. */}
       <div
