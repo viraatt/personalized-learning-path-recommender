@@ -1,14 +1,12 @@
-// parse-profile — Chat -> structured learner profile (Phase 4.1).
+// parse-profile — Chat -> structured learner profile (Phase 4.1) + persist (4.2).
 //
-// Calls Gemini (via the shared _shared/ai.js module) to parse the learner's
-// natural-language intake into a structured profile JSON, then validates the
-// shape at runtime (no TS, so LLM output must be checked defensively).
-//
-// The completed_courses field is returned as course/skill TITLES (strings);
-// mapping titles to course UUIDs happens at persist time (Phase 4.2).
+// 1. Calls Gemini (via _shared/ai.js) to parse the intake into structured JSON.
+// 2. Maps completed_course TITLES to course UUIDs (catalog lookup).
+// 3. Upserts into learner_profiles scoped to the caller's auth.uid() (RLS).
 
 import { corsHeaders } from '../_shared/cors.js'
 import { chat } from '../_shared/ai.js'
+import { createAuthedClient } from '../_shared/supabase.js'
 
 const LEVELS = ['beginner', 'intermediate', 'advanced']
 
@@ -32,7 +30,6 @@ const SYSTEM_PROMPT = `You extract a learner profile from free-text intake. Retu
 - target_role: string — the job role they want, or empty string if unknown
 Do not invent facts. If something is not mentioned, use a sensible default (beginner, empty array).`
 
-// Basic runtime shape validation since there is no compile-time typing.
 function validateProfile(value) {
   if (!value || typeof value !== 'object') {
     throw new Error('Profile parse returned a non-object')
@@ -49,6 +46,21 @@ function validateProfile(value) {
   return value
 }
 
+/**
+ * Map completed-course TITLES to course UUIDs via the seeded catalog.
+ * Uses the service-role client (catalog is public, non-RLS data); unknown
+ * titles are dropped rather than failing the whole profile write.
+ */
+async function mapCourseTitlesToIds(supabase, titles) {
+  if (!Array.isArray(titles) || titles.length === 0) return []
+  const { data: courses, error } = await supabase
+    .from('courses')
+    .select('id, title')
+    .in('title', [...new Set(titles)])
+  if (error) throw new Error(`Failed to resolve course ids: ${error.message}`)
+  return (courses ?? []).map((c) => c.id)
+}
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -63,6 +75,7 @@ Deno.serve(async (req) => {
     const message = String(body?.message ?? '').trim()
     if (!message) return json({ error: 'Message is required' }, 400)
 
+    // Parse profile from the intake text.
     const parsed = await chat({
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -71,11 +84,45 @@ Deno.serve(async (req) => {
       responseSchema: PROFILE_SCHEMA,
       temperature: 0.2,
     })
-
-    // chat() returns a parsed object (not a string) when responseSchema is set.
     const profile = validateProfile(parsed)
 
-    return json({ profile: { ...profile, raw_intake_text: message } })
+    // Clients: authed (user-owned writes, RLS) + service-role (catalog lookup).
+    const authed = createAuthedClient(req)
+    const admin = createAuthedClient(req, { serviceRole: true })
+
+    // Map completed-course titles -> ids.
+    const completedCourseIds = await mapCourseTitlesToIds(
+      admin,
+      profile.completed_courses
+    )
+
+    // Upsert the user's profile (one row per user).
+    const existing = await authed
+      .from('learner_profiles')
+      .select('id')
+      .maybeSingle()
+
+    if (existing.error) throw existing.error
+
+    const row = {
+      user_id: (await authed.auth.getUser()).data.user?.id,
+      raw_intake_text: message,
+      goals: profile.goals,
+      experience_level: profile.experience_level,
+      interests: profile.interests,
+      completed_courses: completedCourseIds,
+      target_role: profile.target_role,
+      updated_at: new Date().toISOString(),
+    }
+
+    const result = existing.data?.id
+      ? await authed.from('learner_profiles').update(row).eq('id', existing.data.id).select()
+      : await authed.from('learner_profiles').insert(row).select()
+
+    if (result.error) throw result.error
+
+    const saved = Array.isArray(result.data) ? result.data[0] : result.data
+    return json({ profile: { ...profile, id: saved?.id, raw_intake_text: message } })
   } catch (err) {
     console.error('parse-profile failed:', err)
     return json({ error: err?.message ?? 'Profile parsing failed' }, 500)
