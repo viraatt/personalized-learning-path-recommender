@@ -62,9 +62,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 7: Graph Logic
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 7.1 | Prerequisite DAG structure + topological sort function | Not started | |
-| 7.2 | Merge retrieval results into DAG, resolve valid ordering | Not started | |
-| 7.3 | Milestone grouping logic (chunk path into checkpoints) | Not started | |
+| 7.1 | Prerequisite DAG structure + topological sort function | Done | `_shared/pathGraph.js`: `buildPrereqLookup` (courseId -> prereq ids) + `topoSort` (Kahn's algorithm; edges outside the path set treated as met; cycle-safe — logs a warning and appends stuck nodes rather than dropping them). |
+| 7.2 | Merge retrieval results into DAG, resolve valid ordering | Done | `resolvePathOrder(catalog, matchedIds, edges, completedIds)`: drops completed matches, transitively pulls unmet catalog prerequisites, returns prerequisite-valid order with `source: 'matched'\|'prerequisite'` tags. Verified via node smoke test (ordering, filtering, pull-in, cycle fallback). |
+| 7.3 | Milestone grouping logic (chunk path into checkpoints) | Done | `groupIntoMilestones(entries, groupSize=3)` -> 1-based `milestone_group`. Wired into new `generate-path` edge function: profile/goal -> embed -> match_courses RPC -> DAG ordering -> milestones -> JSON `{ path }` (persistence is 8.1). Syntax + lint clean; live run deferred to buffer deploys. |
 
 ### Phase 8: Path Persistence + UI
 | # | Sub-phase | Status | Notes |
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 7.1–7.3 (graph logic) | Cline (agent) | Added `_shared/pathGraph.js` (topoSort, resolvePathOrder, groupIntoMilestones — smoke-tested) + `generate-path` edge function returning ordered, milestone-grouped path JSON. Persistence next. | Phase 8: persist generated path to learning_paths/path_steps (8.1), then timeline UI (8.2–8.3). |
 | Aug 24 | 6.1–6.3 (retrieval + skill gaps) | Cline (agent) | Added match_courses RPC migration, `_shared/skillGap.js` (smoke-tested), `retrieve-courses` edge function integrating profile->embedding->similarity->gaps. Live run deferred to buffer. | Day 4 / Phase 7: graph logic — topological sort over prerequisite DAG, merge retrieval results into DAG. |
 | Aug 24 | 5.1–5.3 (embeddings) | Cline (agent) | Added HNSW index migration, `scripts/embed-catalog.js` (needs local GEMINI_API_KEY to run), and `embed-goal` edge function reusing `ai.embed`. Syntax + lint clean; live run/deploy deferred. | Phase 6: retrieval + skill gaps (similarity search over courses.embedding + skill-gap computation from profile). |
 | Aug 24 | 4.3 (display profile) | Cline (agent) | Added getProfile hook + ProfileDisplay card; IntakeChat loads saved profile on mount and shows structured card after parse. Build + lint clean. | Day 3 / Phase 5: embeddings (pgvector column exists; add embed-catalog script + ai.embed via text-embedding-004). |
