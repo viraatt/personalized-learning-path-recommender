@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { submitIntake } from '@/hooks/profile/submitIntake'
 
 /**
- * IntakeChat — chat/form intake UI skeleton (Phase 3.1).
+ * IntakeChat — chat/form intake UI (Phases 3.1–3.2).
  *
- * Currently a UI scaffold only: maintains local message state and renders a
- * simple single-form/chat input. It does NOT call any backend yet — wiring the
- * input to the profiling edge function is sub-phase 3.2, and loading/error UI
- * states are sub-phase 3.3.
+ * Renders a simple single-form/chat input and wires it to the `parse-profile`
+ * edge function via `submitIntake`. Loading/error UI states land in sub-phase
+ * 3.3; the function returns a stub profile until Phase 4.1 adds real Gemini
+ * parsing.
  *
  * Deliberately a single simple form (no multi-step wizard), per SCOPE.md's
  * OUT-OF-SCOPE note.
@@ -21,9 +22,28 @@ export default function IntakeChat() {
     const text = draft.trim()
     if (!text) return
 
-    // Skeleton: append the user's message locally. No backend call yet (3.2).
+    // Push the user's message immediately, then call the profiling function.
     setMessages((prev) => [...prev, { role: 'user', content: text }])
     setDraft('')
+
+    void submitIntake(text)
+      .then((profile) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content:
+              'Thanks! Here is your parsed profile (stub for now): ' +
+              JSON.stringify(profile, null, 2),
+          },
+        ])
+      })
+      .catch((error) => {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: `Something went wrong: ${error.message}` },
+        ])
+      })
   }
 
   return (
@@ -52,7 +72,7 @@ export default function IntakeChat() {
             <div
               key={index}
               className={cn(
-                'max-w-[80%] rounded-lg bg-muted px-3 py-2 text-left text-sm',
+                'max-w-[80%] whitespace-pre-wrap rounded-lg bg-muted px-3 py-2 text-left text-sm',
                 message.role === 'user' && 'self-end bg-primary text-primary-foreground'
               )}
             >
