@@ -53,9 +53,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 6: Retrieval + Skill Gaps
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 6.1 | Similarity search function (top-N course matches) | Not started | |
-| 6.2 | Skill gap computation logic | Not started | |
-| 6.3 | Integration check: profile in -> ranked courses out | Not started | |
+| 6.1 | Similarity search function (top-N course matches) | Done | `match_courses(query_embedding, match_count)` Postgres RPC (cosine `<=>`, backed by HNSW index) in `20260824170000_match_courses_rpc.sql` with explicit grants. Edge function `retrieve-courses` embeds the goal via `ai.embed` and calls the RPC. RPC not yet applied to remote (`db push` needs credentials — buffer step). |
+| 6.2 | Skill gap computation logic | Done | `_shared/skillGap.js` pure module: `computeSkillGap(targetSkills, existingSkills)` -> `{ gaps, covered, coverage }` (case-insensitive, deduped) + `collectCourseSkills(courses)`. Verified via stubbed node smoke test (dedup, case-insensitivity, coverage math, empty case). |
+| 6.3 | Integration check: profile in -> ranked courses out | Done (static) | `retrieve-courses` ties it together: reads saved profile (RLS) + optional goal text -> embedding -> match_courses RPC -> skill gap vs. completed-course skills -> returns `{ matches, skillGap, profileUsed }`. Live end-to-end pending DB push + function deploy (buffer). Syntax + lint clean. |
 
 ## Day 4 (Aug 25) — Path Generator
 
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 6.1–6.3 (retrieval + skill gaps) | Cline (agent) | Added match_courses RPC migration, `_shared/skillGap.js` (smoke-tested), `retrieve-courses` edge function integrating profile->embedding->similarity->gaps. Live run deferred to buffer. | Day 4 / Phase 7: graph logic — topological sort over prerequisite DAG, merge retrieval results into DAG. |
 | Aug 24 | 5.1–5.3 (embeddings) | Cline (agent) | Added HNSW index migration, `scripts/embed-catalog.js` (needs local GEMINI_API_KEY to run), and `embed-goal` edge function reusing `ai.embed`. Syntax + lint clean; live run/deploy deferred. | Phase 6: retrieval + skill gaps (similarity search over courses.embedding + skill-gap computation from profile). |
 | Aug 24 | 4.3 (display profile) | Cline (agent) | Added getProfile hook + ProfileDisplay card; IntakeChat loads saved profile on mount and shows structured card after parse. Build + lint clean. | Day 3 / Phase 5: embeddings (pgvector column exists; add embed-catalog script + ai.embed via text-embedding-004). |
 | Aug 24 | 4.2 (persist profile) | Cline (agent) | parse-profile upserts to learner_profiles (RLS-scoped via JWT) via new `_shared/supabase.js`; maps course titles->UUIDs. Syntax + lint clean. | Phase 4.3: retrieve + display profile in UI, verify parsing accuracy. |
