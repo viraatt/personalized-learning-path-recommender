@@ -21,9 +21,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 2: Data Model
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 2.1 | Schema: `courses` + `prerequisites` tables/migration | Not started | |
-| 2.2 | Schema: `learner_profiles` + `skill_mastery` tables/migration | Not started | |
-| 2.3 | Seed script: catalog data (courses + prerequisite edges) | Not started | |
+| 2.1 | Schema: `courses` + `prerequisites` tables/migration | Done| |
+| 2.2 | Schema: `learner_profiles` + `skill_mastery` tables/migration | Done | |
+| 2.3 | Seed script: catalog data (courses + prerequisite edges) | Done | `scripts/seed-catalog.js`: curated 13-course catalog (data-science, web-dev, cloud) + 14 prerequisite edges, idempotent insert/update by title, verified against linked Supabase. Assumption: reference repo has no transferable catalog, so content is ours. |
 
 ## Day 2 (Aug 23) — Profiling
 
@@ -125,4 +125,4 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
-| | | | | |
+| Aug 24 | 2.3 (seed script) | Cline (agent) | Built + ran `scripts/seed-catalog.js` (13 courses, 14 edges), verified persisted. Build passes. | Phase 3.1: chat intake UI skeleton. Note: 2.1/2.2 Done marks were pre-existing uncommitted edits (now committed together). |
