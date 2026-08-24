@@ -69,9 +69,9 @@ next sub-phase should be. This file + `git log` are how a new agent session
 ### Phase 8: Path Persistence + UI
 | # | Sub-phase | Status | Notes |
 |---|---|---|---|
-| 8.1 | Persist generated path/steps to DB | Not started | |
-| 8.2 | Frontend: render path as timeline/list | Not started | |
-| 8.3 | Frontend: milestone markers | Not started | |
+| 8.1 | Persist generated path/steps to DB | Done | `generate-path` now inserts a `learning_paths` row + pending `path_steps` (order_index, milestone_group, status='pending') via the authed client, and returns `{ pathId, path }`. Syntax-checked; live run deferred to buffer deploys. |
+| 8.2 | Frontend: render path as timeline/list | Done | `src/hooks/path/getPath.js` fetches latest path + ordered steps with embedded course details (PostgREST nested select); new `src/components/path/PathTimeline.jsx` renders a vertical timeline with per-step title/description/difficulty/duration/skills + status badges. |
+| 8.3 | Frontend: milestone markers | Done | Timeline groups steps under numbered milestone headers (`Milestone N`) with node dots on the rail. App.jsx renders intake + timeline in one column. Build EXIT=0, oxlint 0/0. |
 
 ## Day 5 (Aug 26) — Explainability, Tutor, Adaptive Loop
 
@@ -125,6 +125,7 @@ Add one entry per agent session, most recent first.
 
 | Date | Sub-phase(s) worked | Agent/tool used | Outcome | Next step |
 |---|---|---|---|---|
+| Aug 24 | 8.1–8.3 (path persistence + timeline UI) | Cline (agent) | generate-path persists path+steps; added getPath hook + PathTimeline with milestone markers. Build EXIT=0, lint clean. NOT pushed — user pushes manually. | Day 5 / Phase 9: explainability (per-step grounded rationale via explain-step function + explanation cards). |
 | Aug 24 | 7.1–7.3 (graph logic) | Cline (agent) | Added `_shared/pathGraph.js` (topoSort, resolvePathOrder, groupIntoMilestones — smoke-tested) + `generate-path` edge function returning ordered, milestone-grouped path JSON. Persistence next. | Phase 8: persist generated path to learning_paths/path_steps (8.1), then timeline UI (8.2–8.3). |
 | Aug 24 | 6.1–6.3 (retrieval + skill gaps) | Cline (agent) | Added match_courses RPC migration, `_shared/skillGap.js` (smoke-tested), `retrieve-courses` edge function integrating profile->embedding->similarity->gaps. Live run deferred to buffer. | Day 4 / Phase 7: graph logic — topological sort over prerequisite DAG, merge retrieval results into DAG. |
 | Aug 24 | 5.1–5.3 (embeddings) | Cline (agent) | Added HNSW index migration, `scripts/embed-catalog.js` (needs local GEMINI_API_KEY to run), and `embed-goal` edge function reusing `ai.embed`. Syntax + lint clean; live run/deploy deferred. | Phase 6: retrieval + skill gaps (similarity search over courses.embedding + skill-gap computation from profile). |

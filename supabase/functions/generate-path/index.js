@@ -1,8 +1,8 @@
-// generate-path — learner profile/goal in -> ordered, milestone-grouped path.
+// generate-path — learner profile/goal in -> persisted, ordered path.
 //
-// Phase 7 integration: retrieval (Phase 6) feeds the prerequisite DAG
-// (_shared/pathGraph.js) to produce a valid learning order. Persistence into
-// learning_paths/path_steps is Phase 8.1 — this function only returns JSON.
+// Retrieval (Phase 6) feeds the prerequisite DAG (_shared/pathGraph.js) to
+// produce a prerequisite-valid, milestone-grouped learning order, then
+// persists it (Phase 8.1) as a learning_paths row + pending path_steps.
 
 import { corsHeaders } from '../_shared/cors.js'
 import { embed } from '../_shared/ai.js'
@@ -82,7 +82,35 @@ Deno.serve(async (req) => {
       milestone_group: entry.milestone_group,
     }))
 
-    return json({ path, generated_at: new Date().toISOString() })
+    // 8.1 Persist: one learning_paths row per generation + pending steps.
+    const {
+      data: { user },
+    } = await authed.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
+    const { data: pathRow, error: pathInsertError } = await authed
+      .from('learning_paths')
+      .insert({ user_id: user.id })
+      .select('id')
+      .single()
+    if (pathInsertError) throw pathInsertError
+
+    const { error: stepsError } = await authed.from('path_steps').insert(
+      path.map((step) => ({
+        path_id: pathRow.id,
+        course_id: step.course_id,
+        order_index: step.order_index,
+        milestone_group: step.milestone_group,
+        status: 'pending',
+      }))
+    )
+    if (stepsError) throw stepsError
+
+    return json({
+      pathId: pathRow.id,
+      path,
+      generated_at: new Date().toISOString(),
+    })
   } catch (err) {
     console.error('generate-path failed:', err)
     return json({ error: err?.message ?? 'Path generation failed' }, 500)
