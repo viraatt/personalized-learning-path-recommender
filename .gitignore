@@ -4,23 +4,30 @@ logs/
 *.txt
 .temp/
 *.zip
+scratch/
 
 # Agent & Prompt residue
 AGENT_MASTER_PROMPT.md
 
-node_modules
-dist
-dist-ssr
+# Dependencies & Build artifacts
+node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor directories and OS files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
+

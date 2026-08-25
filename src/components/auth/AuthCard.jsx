@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
@@ -84,6 +84,11 @@ export default function AuthCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {!isSupabaseConfigured && (
+          <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-600 dark:text-amber-400">
+            <span className="font-semibold">⚠️ Setup Required:</span> Supabase credentials not found in <code className="rounded bg-muted px-1 py-0.5 font-mono">.env</code>. Copy <code className="rounded bg-muted px-1 py-0.5 font-mono">.env.example</code> to <code className="rounded bg-muted px-1 py-0.5 font-mono">.env</code> and supply your Supabase URL & keys.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Email</span>

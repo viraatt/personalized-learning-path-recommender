@@ -8,6 +8,10 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "seed": "node scripts/seed-catalog.js",
+    "embed": "node scripts/embed-catalog.js",
+    "test:e2e": "node scripts/qa-e2e.js",
+    "test:auth": "node scripts/auth-smoke.js",
     "package": "node scripts/package-zip.js"
   },
   "dependencies": {
