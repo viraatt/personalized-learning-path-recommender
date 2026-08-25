@@ -17,13 +17,31 @@ import {
   collectStepFacts,
 } from '../_shared/grounding.js'
 
-const RATIONALE_SCHEMA = {
+const SINGLE_SCHEMA = {
   type: 'object',
   properties: { rationale: { type: 'string' } },
   required: ['rationale'],
 }
 
-function buildPrompt(profileFacts, stepFacts) {
+const BATCH_SCHEMA = {
+  type: 'object',
+  properties: {
+    explanations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          step_id: { type: 'string' },
+          rationale: { type: 'string' },
+        },
+        required: ['step_id', 'rationale'],
+      },
+    },
+  },
+  required: ['explanations'],
+}
+
+function buildSinglePrompt(profileFacts, stepFacts) {
   return `Learner profile facts:
 ${profileFacts.length > 0 ? profileFacts.join('\n') : '- (no profile details available)'}
 
@@ -34,6 +52,25 @@ In 2-3 sentences, explain why this course is recommended for this learner.
 Reference ONLY the facts above — never invent skills, goals, or history the
 learner did not state. If profile facts are missing, speak generically about
 how the course's difficulty and position fit a structured learning order.`
+}
+
+function buildBatchPrompt(profileFacts, steps) {
+  const stepsText = steps
+    .map((s) => {
+      const { lines } = collectStepFacts(s)
+      return `[Step ID: ${s.id}]\n${lines.join('\n')}`
+    })
+    .join('\n\n')
+
+  return `Learner profile facts:
+${profileFacts.length > 0 ? profileFacts.join('\n') : '- (no profile details available)'}
+
+Recommended course steps:
+${stepsText}
+
+For each course step listed above, write a concise 2-3 sentence explanation of why this course is recommended for this learner.
+Reference ONLY the facts above — never invent skills, goals, or history the learner did not state. If profile facts are missing, speak generically about how the course's difficulty and position fit a structured learning order.
+Return a JSON object with an 'explanations' array containing the step_id and rationale for each step.`
 }
 
 const json = (body, status = 200) =>
@@ -87,12 +124,11 @@ Deno.serve(async (req) => {
     if (stepsError) throw stepsError
     if (!steps?.length) return json({ explanations: {} })
 
-    // Generate + persist rationales sequentially, pacing calls to stay under
-    // free-tier RPM limits (13 steps x ~5s is well inside the wall-clock cap).
     const explanations = {}
-    for (let i = 0; i < steps.length; i++) {
-      if (i > 0) await new Promise((r) => setTimeout(r, 5000))
-      const step = steps[i]
+
+    if (stepId || steps.length === 1) {
+      // Single step mode
+      const step = steps[0]
       const { lines } = collectStepFacts(step)
       const result = await chat({
         messages: [
@@ -101,9 +137,9 @@ Deno.serve(async (req) => {
             content:
               'You write concise, grounded learning recommendations. Use ONLY provided facts.',
           },
-          { role: 'user', content: buildPrompt(profileFacts.lines, lines) },
+          { role: 'user', content: buildSinglePrompt(profileFacts.lines, lines) },
         ],
-        responseSchema: RATIONALE_SCHEMA,
+        responseSchema: SINGLE_SCHEMA,
         temperature: 0.4,
       })
 
@@ -117,6 +153,48 @@ Deno.serve(async (req) => {
       if (updateError) throw updateError
 
       explanations[step.id] = rationale
+    } else {
+      // Batch mode: one LLM call for all steps
+      const result = await chat({
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You write concise, grounded learning recommendations. Use ONLY provided facts.',
+          },
+          { role: 'user', content: buildBatchPrompt(profileFacts.lines, steps) },
+        ],
+        responseSchema: BATCH_SCHEMA,
+        temperature: 0.4,
+      })
+
+      const returnedList = Array.isArray(result?.explanations) ? result.explanations : []
+      const returnedMap = new Map()
+      for (const item of returnedList) {
+        if (item?.step_id && item?.rationale) {
+          returnedMap.set(String(item.step_id).trim(), String(item.rationale).trim())
+        }
+      }
+
+      // Update and map each step
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i]
+        let rationale = returnedMap.get(step.id)
+        if (!rationale && returnedList[i]?.rationale) {
+          rationale = String(returnedList[i].rationale).trim()
+        }
+        if (!rationale) {
+          rationale = `This course is positioned at step ${step.order_index} in milestone ${step.milestone_group} to build essential skills in a structured learning sequence.`
+        }
+
+        const { error: updateError } = await authed
+          .from('path_steps')
+          .update({ rationale_text: rationale })
+          .eq('id', step.id)
+        if (updateError) throw updateError
+
+        explanations[step.id] = rationale
+      }
     }
 
     return json({ explanations })

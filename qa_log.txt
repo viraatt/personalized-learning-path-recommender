@@ -1,13 +1,13 @@
 PASS  auth: QA user signed in
-PASS  parse-profile: 200 — {"profile":{"goals":"Become a machine learning engineer with a focus on deep learning and cloud deployment","experience_level":"beginner","interests":["deep learning","cloud deployment","machine learning"],"completed_courses":["Python","pandas"],"target_role":"machine learning engineer","id":"088334
-PASS  parse-profile: goals text — "Become a machine learning engineer with a focus on deep learning and cloud deployment"
-PASS  parse-profile: level valid — beginner
+PASS  parse-profile: 200 — {"profile":{"goals":"Become a machine learning engineer, focusing on deep learning and cloud deployment","experience_level":"intermediate","interests":["deep learning","cloud deployment","machine learning"],"completed_courses":["Python","pandas"],"target_role":"machine learning engineer"}
+PASS  parse-profile: goals text — "Become a machine learning engineer, focusing on deep learning and cloud deployment"
+PASS  parse-profile: level valid — intermediate
 PASS  parse-profile: completed courses mapped — ["Python","pandas"]
 PASS  generate-path: 200 — ""
 PASS  generate-path: has steps — 13 steps; milestones=1,2,3,4,5
-PASS  generate-path: path id — e769583b-9c52-4f57-83b4-42eaea3e96e4
-FAIL  explain-step: 200 — ""
-FAIL  explain-step: rationales produced — 0 rationales
+PASS  generate-path: path id — 1e2772db-8508-4ad4-8888-23a0359cbec4
+PASS  explain-step: 200 — ""
+PASS  explain-step: rationales produced — 13 rationales
 PASS  tutor-chat: 200 — ""
 PASS  tutor-chat: non-empty reply
 PASS  retrieve-courses: 200 — ""
@@ -16,4 +16,4 @@ PASS  retrieve-courses: skill gap object
 
 Test user: qa-runner@example.com
 
-QA RESULT: FAILURES ABOVE
+QA RESULT: ALL PASS

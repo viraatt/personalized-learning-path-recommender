@@ -18,7 +18,9 @@ import ProfileDisplay from '@/components/profile/ProfileDisplay'
  * Deliberately a single simple form (no multi-step wizard), per SCOPE.md's
  * OUT-OF-SCOPE note.
  */
-export default function IntakeChat() {
+import { regeneratePath } from '@/hooks/progress/regeneratePath'
+
+export default function IntakeChat({ onProfileUpdated }) {
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState([])
   const [status, setStatus] = useState('idle')
@@ -50,16 +52,22 @@ export default function IntakeChat() {
     setStatus('loading')
 
     void submitIntake(text)
-      .then((parsed) => {
+      .then(async (parsed) => {
         setProfile(parsed)
+        try {
+          await regeneratePath()
+        } catch {
+          /* generator will also be available via re-sequence */
+        }
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            content: 'Got it — I saved your learner profile. Update it any time below.',
+            content: 'Got it — I parsed your profile and generated your customized learning path below!',
           },
         ])
         setStatus('success')
+        onProfileUpdated?.(parsed)
       })
       .catch((error) => {
         setMessages((prev) => [

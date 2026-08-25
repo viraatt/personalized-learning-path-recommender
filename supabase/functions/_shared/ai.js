@@ -14,8 +14,8 @@
 // Includes basic retry/backoff for Gemini free-tier rate limits.
 
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
-const DEFAULT_MODEL = 'gemini-3.6-flash' // gemini-2.5-flash was retired for new API keys
-const EMBED_MODEL = 'gemini-embedding-001' // text-embedding-004 was retired; same 768-dim output via outputDimensionality
+const DEFAULT_MODEL = 'gemini-3.5-flash'
+const EMBED_MODEL = 'gemini-embedding-001' // 768-dim output via outputDimensionality
 const EMBED_DIMS = 768
 const MAX_ATTEMPTS = 6
 
@@ -38,7 +38,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 export async function chat({
   messages,
   responseSchema,
-  maxOutputTokens = 2000,
+  maxOutputTokens = 8000,
   temperature = 0.2,
   model = DEFAULT_MODEL,
 } = {}) {

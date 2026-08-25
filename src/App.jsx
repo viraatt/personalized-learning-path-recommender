@@ -107,9 +107,11 @@ export default function App() {
 
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem('theme') ||
+      return (
+        localStorage.getItem('theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    } catch (e) {
+      )
+    } catch {
       return 'light'
     }
   })
@@ -123,7 +125,9 @@ export default function App() {
         root.classList.remove('dark')
       }
       localStorage.setItem('theme', theme)
-    } catch (e) {}
+    } catch {
+      /* ignore storage access issues */
+    }
   }, [theme])
 
   function toggleTheme() {
