@@ -4,16 +4,16 @@
 
 | Layer | Choice |
 |---|---|
-| Frontend framework | Vite + React 18 + JavaScript (JSX, no TypeScript) |
+| Frontend framework | Vite + React 19 + JavaScript (JSX, no TypeScript) |
 | UI components | shadcn/ui + Radix UI |
 | Styling | Tailwind CSS |
 | Charts | Recharts |
-| State management | Zustand (client state) + TanStack Query (server state/caching) |
+| State management | Local React state (useState/useEffect) |
 | Backend/API | Supabase Edge Functions (Deno runtime, JavaScript) |
 | Database | Supabase Postgres, with `pgvector` extension enabled |
 | Auth | Supabase Auth (email/password) |
-| LLM (chat, profiling, explanations, tutor) | Gemini 2.5 Flash, via Google AI Studio API key |
-| Embeddings | Gemini `text-embedding-004`, same API key |
+| LLM (chat, profiling, explanations, tutor) | Gemini 3.6 Flash, via Google AI Studio API key |
+| Embeddings | Gemini `gemini-embedding-001`, same API key |
 | Deployment (optional, buffer-phase only) | Netlify or Vercel (frontend) + Supabase (backend, already hosted) |
 
 Single external credential required: `GEMINI_API_KEY`.
@@ -36,51 +36,52 @@ Single external credential required: `GEMINI_API_KEY`.
 
 ## AI Provider Abstraction
 
-A single shared module (`supabase/functions/_shared/aiProvider.js`) wraps
+A single shared module (`supabase/functions/_shared/ai.js`) wraps
 all Gemini calls:
 
 - `chat(messages, options)` — text/JSON generation (profiling, explanations,
   tutor responses). Use Gemini's structured-output/JSON-schema mode for
   anything that must return parseable JSON (profile extraction, explanation
   objects) rather than parsing free text.
-- `embed(text)` — returns an embedding vector via `text-embedding-004`.
+- `embed(text)` — returns an embedding vector via `gemini-embedding-001`.
 - Includes basic retry/backoff for Gemini's free-tier rate limits, added in
   Phase 1 setup, not deferred.
 
 Every edge function imports and calls this module rather than reimplementing
 API calls, so a provider or model swap later only touches one file.
 
-## Folder Structure (target)
+## Folder Structure
 
 ```
 src/
   components/
-    intake/         Chat/form intake UI
+    auth/            Email/password sign-in/up UI card
+    intake/          Chat/form intake UI
     path/            Path timeline, milestone display, step cards
     dashboard/       Skill chart, progress summary, next-action widget
     tutor/           Tutor chat widget
     ui/              shadcn/ui primitives
   hooks/
+    auth/            Auth session hooks
     profile/         Profile fetch/update hooks
-    path/             Path fetch/regenerate hooks
-    progress/         Progress tracking hooks
-  lib/                Supabase client, shared helpers
-  pages/              Route-level pages
-  store/              Zustand stores
+    path/            Path fetch/regenerate hooks
+    progress/        Progress tracking hooks
+  lib/               Supabase client, shared helpers, utils
+  pages/             Route-level pages (Landing, ChatPage, DashboardPage, ProfilePage)
 supabase/
-  migrations/         SQL schema migrations
+  migrations/        SQL schema migrations
   functions/
     _shared/
-      aiProvider.js    Gemini client wrapper (chat + embed)
+      ai.js          Gemini client wrapper (chat + embed)
       cors.js
-    parse-profile/     Chat -> structured learner profile
-    generate-path/      Retrieval + DAG sequencing -> ordered path
-    explain-step/        Grounded per-step recommendation rationale
-    tutor-chat/          Scoped Q&A on current path/profile
-    update-progress/    Mark complete/rate -> mastery update -> path re-run
+    parse-profile/    Chat -> structured learner profile
+    generate-path/    Retrieval + DAG sequencing -> ordered path
+    explain-step/     Grounded per-step recommendation rationale
+    tutor-chat/       Scoped Q&A on current path/profile
+    update-progress/  Mark complete/rate -> mastery update -> path re-run
 scripts/
-  seed-catalog.js       Seeds courses + prerequisite edges
-  embed-catalog.js       Generates + stores embeddings for catalog
+  seed-catalog.js     Seeds courses + prerequisite edges
+  embed-catalog.js    Generates + stores embeddings for catalog
 docs/
   PROJECT_BRIEF.md
   SCOPE.md

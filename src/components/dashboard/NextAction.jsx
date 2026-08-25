@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getPath } from '@/hooks/path/getPath'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
 /**
  * NextAction — surfaces the single next recommended action (11.2): the first
@@ -63,9 +64,11 @@ export default function NextAction() {
   }
 
   return (
-    <section aria-label="Next recommended action" className="rounded-lg border bg-background p-4 text-left">
-      <h2 className="text-lg font-semibold tracking-tight">Next recommended action</h2>
-      <div className="mt-3">{body}</div>
-    </section>
+    <Card aria-label="Next recommended action" className="text-left">
+      <CardHeader>
+        <CardTitle className="text-lg">Next recommended action</CardTitle>
+      </CardHeader>
+      <CardContent>{body}</CardContent>
+    </Card>
   )
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { describeError } from '@/lib/errorMessage'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { submitIntake } from '@/hooks/profile/submitIntake'
 import { getProfile } from '@/hooks/profile/getProfile'
 import ProfileDisplay from '@/components/profile/ProfileDisplay'
@@ -147,21 +149,21 @@ export default function IntakeChat() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <textarea
+        <Textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Describe your learning goal…"
           rows={2}
           disabled={status === 'loading'}
-          className="flex-1 resize-none rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          className="flex-1 resize-none"
         />
-        <button
+        <Button
           type="submit"
-          className="rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-50"
           disabled={!draft.trim() || status === 'loading'}
+          className="h-auto shrink-0 px-4"
         >
           {status === 'loading' ? 'Sending…' : 'Send'}
-        </button>
+        </Button>
       </form>
     </div>
   )

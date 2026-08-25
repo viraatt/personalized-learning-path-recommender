@@ -41,6 +41,7 @@
 
   --destructive: oklch(0.577 0.245 27.325);
 
+  --border: oklch(0.9 0.005 95);
   --input: oklch(0.9 0.005 95);
   --ring: oklch(0.62 0.18 273);
 
@@ -63,10 +64,52 @@
   --sidebar-ring: oklch(0.62 0.18 273);
 }
 
-/* Dark variant kept for completeness; the app never applies `.dark`. */
+/* Dark mode palette */
 .dark {
-  --background: oklch(0.16 0.01 260);
-  --foreground: oklch(0.96 0 0);
+  color-scheme: dark;
+
+  --background: oklch(0.18 0.01 260);
+  --foreground: oklch(0.92 0.005 260);
+
+  --card: oklch(0.20 0.01 260);
+  --card-foreground: oklch(0.92 0.005 260);
+
+  --popover: oklch(0.20 0.01 260);
+  --popover-foreground: oklch(0.92 0.005 260);
+
+  --primary: oklch(0.68 0.16 273);
+  --primary-foreground: oklch(0.18 0.01 260);
+
+  --secondary: oklch(0.25 0.01 260);
+  --secondary-foreground: oklch(0.85 0.01 260);
+
+  --muted: oklch(0.24 0.01 260);
+  --muted-foreground: oklch(0.62 0.01 260);
+
+  --accent: oklch(0.28 0.03 273);
+  --accent-foreground: oklch(0.85 0.08 273);
+
+  --destructive: oklch(0.55 0.20 27);
+
+  --border: oklch(0.28 0.01 260);
+  --input: oklch(0.28 0.01 260);
+  --ring: oklch(0.68 0.16 273);
+
+  /* Chart palette for dark mode */
+  --chart-1: oklch(0.68 0.16 273);
+  --chart-2: oklch(0.72 0.13 200);
+  --chart-3: oklch(0.76 0.12 145);
+  --chart-4: oklch(0.79 0.11 75);
+  --chart-5: oklch(0.72 0.15 350);
+
+  --sidebar: oklch(0.20 0.01 260);
+  --sidebar-foreground: oklch(0.92 0.005 260);
+  --sidebar-primary: oklch(0.68 0.16 273);
+  --sidebar-primary-foreground: oklch(0.18 0.01 260);
+  --sidebar-accent: oklch(0.28 0.03 273);
+  --sidebar-accent-foreground: oklch(0.85 0.08 273);
+  --sidebar-border: oklch(0.28 0.01 260);
+  --sidebar-ring: oklch(0.68 0.16 273);
 }
 
 body {

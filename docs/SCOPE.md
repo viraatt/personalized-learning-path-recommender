@@ -9,7 +9,7 @@ seems small, related, or already partially present in copied reference code.
 - Chat/form-based intake for learner goals, interests, experience level
 - LLM-based parsing of intake into a structured learner profile (JSON)
 - Course/skill catalog with prerequisite relationships (seeded data)
-- Embedding-based retrieval of relevant courses (Gemini `text-embedding-004`
+- Embedding-based retrieval of relevant courses (Gemini `gemini-embedding-001`
   + pgvector similarity search)
 - Skill-gap computation (target skills vs. profile skills)
 - Prerequisite-DAG-based path sequencing (topological sort) with milestone
@@ -22,6 +22,7 @@ seems small, related, or already partially present in copied reference code.
 - Dashboard: profile summary, skill radar/bar chart, path timeline, next
   recommended action
 - Basic auth (Supabase email/password) if needed for per-user persistence
+- Dark mode / theme switching with a toggle controls
 - README, architecture doc, ZIP packaging
 
 ## OUT-OF-SCOPE (explicitly excluded — do not build)
@@ -36,7 +37,6 @@ seems small, related, or already partially present in copied reference code.
 - Admin panels / topic generation utilities
 - Any second LLM/embedding provider beyond Gemini (no OpenAI, no OpenRouter,
   no multi-provider fallback chains)
-- Dark mode / theme switching
 - Any deployment work before Phase 12 is complete (deployment is optional
   and lives entirely in the buffer period, Aug 28–30)
 

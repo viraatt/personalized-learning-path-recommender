@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 /**
  * Map auth errors to actionable messages. Supabase Auth rate-limits signups
@@ -71,82 +74,81 @@ export default function AuthCard() {
   }
 
   return (
-    <section
-      aria-label="Sign in"
-      className="mx-auto mt-10 w-full max-w-md rounded-lg border bg-background p-6"
-    >
-      <h1 className="text-xl font-semibold tracking-tight">
-        {mode === 'signin' ? 'Welcome back' : 'Create your account'}
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Sign in so your learning path, progress, and mastery stay with you.
-      </p>
+    <Card className="mx-auto mt-10 w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-xl">
+          {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+        </CardTitle>
+        <CardDescription>
+          Sign in so your learning path, progress, and mastery stay with you.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-muted-foreground">Email</span>
+            <Input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={status === 'loading'}
+              placeholder="you@example.com"
+            />
+          </label>
 
-      <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted-foreground">Email</span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-muted-foreground">Password</span>
+            <Input
+              type="password"
+              required
+              minLength={6}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={status === 'loading'}
+              placeholder="At least 6 characters"
+            />
+          </label>
+
+          {error && (
+            <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
+
+          {notice && (
+            <p role="status" className="rounded-md bg-accent px-3 py-2 text-sm text-accent-foreground">
+              {notice}
+            </p>
+          )}
+
+          <Button
+            type="submit"
             disabled={status === 'loading'}
-            className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-            placeholder="you@example.com"
-          />
-        </label>
+            className="mt-2 w-full"
+          >
+            {status === 'loading'
+              ? 'Working…'
+              : mode === 'signin'
+                ? 'Sign in'
+                : 'Sign up'}
+          </Button>
+        </form>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted-foreground">Password</span>
-          <input
-            type="password"
-            required
-            minLength={6}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={status === 'loading'}
-            className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-            placeholder="At least 6 characters"
-          />
-        </label>
-
-        {error && (
-          <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
-        )}
-
-        {notice && (
-          <p role="status" className="rounded-md bg-accent px-3 py-2 text-sm text-accent-foreground">
-            {notice}
-          </p>
-        )}
-
-        <button
-          type="submit"
+        <Button
+          type="button"
+          onClick={toggleMode}
           disabled={status === 'loading'}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-50"
+          variant="link"
+          className="mt-4 px-0 text-muted-foreground"
         >
-          {status === 'loading'
-            ? 'Working…'
-            : mode === 'signin'
-              ? 'Sign in'
-              : 'Sign up'}
-        </button>
-      </form>
-
-      <button
-        type="button"
-        onClick={toggleMode}
-        disabled={status === 'loading'}
-        className="mt-4 text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
-      >
-        {mode === 'signin'
-          ? "New here? Create an account"
-          : 'Already have an account? Sign in'}
-      </button>
-    </section>
+          {mode === 'signin'
+            ? "New here? Create an account"
+            : 'Already have an account? Sign in'}
+        </Button>
+      </CardContent>
+    </Card>
   )
 }
