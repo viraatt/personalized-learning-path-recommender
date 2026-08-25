@@ -17,18 +17,6 @@ const OUT_ZIP = path.join(ROOT, 'personalized-learning-path-recommender-submissi
 
 console.log('Creating clean submission ZIP archive...')
 
-const excludeList = [
-  'node_modules',
-  '.git',
-  '.env',
-  '.temp',
-  'dist',
-  '*.log',
-  '*.txt',
-  '*.zip',
-  '.DS_Store',
-]
-
 try {
   if (fs.existsSync(OUT_ZIP)) {
     fs.unlinkSync(OUT_ZIP)

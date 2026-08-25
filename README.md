@@ -1,169 +1,130 @@
-# AI-Powered Personalized Learning Path Recommender
+# 🧭 Pathfinder — AI Personalized Learning Path Recommender
 
-An AI-powered assistant that understands a learner's goals, interests, and
-experience level, identifies skill gaps, and generates a structured,
-explainable, adaptive learning roadmap — built for [Hackathon Name].
+> An intelligent, graph-sequenced, adaptive learning assistant that turns free-form career goals into structured, explainable roadmaps.
 
-See `docs/PROJECT_BRIEF.md` for the full problem statement, deliverables,
-and judging criteria.
+[![React 19](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8.2-purple.svg)](https://vitejs.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20pgvector-3ecf8e.svg)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI%20Flash-orange.svg)](https://aistudio.google.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Features
+---
 
-- Conversational intake — describe your learning goals in plain English
-- Learner profiling engine — captures interests, experience level,
-  completed courses, and objectives
-- AI-powered recommendation engine — retrieves relevant courses via
-  semantic search over a curated course/skill catalog
-- Personalized path generator — sequences recommendations using a
-  prerequisite graph, with milestones
-- Explainability — every recommendation comes with a grounded rationale
-  tied to your actual profile
-- Tutor Q&A — ask "why this" or "why not that" about your path
-- Adaptive feedback loop — mark progress or rate a course, and the
-  remaining path re-sequences based on updated skill mastery
-- Dashboard — profile summary, skill progress chart, path timeline,
-  next recommended action
+## 💡 What is Pathfinder?
 
-See `docs/SCOPE.md` for what is explicitly in and out of scope.
+Online learning catalogs have thousands of courses, but learners struggle with **what to learn next** and **in what order**. 
 
-## Tech Stack
+**Pathfinder** combines **Large Language Models**, **Vector Similarity Search (`pgvector`)**, and **Graph Theory (Directed Acyclic Graph Topological Sort)** to:
+1. Understand your background, experience level, and goals through natural conversation.
+2. Retrieve the highest-relevance courses and identify skill gaps.
+3. Automatically sequence courses into a prerequisite-valid roadmap with milestones.
+4. Provide hallucination-free, grounded explanations for every pick.
+5. Adapt dynamically as you complete courses and rate your mastery.
 
-| Layer | Choice |
-|---|---|
-| Frontend | Vite + React 19 + JavaScript |
-| UI | shadcn/ui (Radix UI) + Tailwind CSS |
-| Charts | Recharts |
-| State | Local React state (no global store needed) |
-| Backend | Supabase Edge Functions (Deno) |
-| Database | Supabase Postgres + pgvector |
-| Auth | Supabase Auth |
-| LLM + Embeddings | Google Gemini Flash + `gemini-embedding-001` (768-dim) |
+---
 
-Full architecture details in `docs/ARCHITECTURE.md`.
+## ✨ Key Features
 
-## Prerequisites
+| Feature | How It Works |
+| :--- | :--- |
+| 💬 **Conversational Intake** | Chat naturally in plain English. Gemini extracts structured profiles with experience levels, goals, and completed courses. |
+| 🔍 **pgvector Semantic Search** | Goal text is converted to 768-dim embeddings to perform cosine similarity retrieval over catalog courses via Postgres HNSW indexes. |
+| 🕸️ **Prerequisite DAG Sequencer** | Kahn’s Topological Sort algorithm resolves dependencies, pulls missing prerequisites, and groups courses into logical milestones. |
+| 🛡️ **Grounded Explainability** | Zero-shot fact-constrained prompting produces precise, hallucination-free rationales ("*Why this is recommended*") for every step. |
+| 🤖 **Context-Aware AI Tutor** | In-app AI tutor is grounded on your active roadmap to answer questions and offer personalized study strategies. |
+| 📊 **Adaptive Dashboard & Feedback** | Interactive mastery charts track your skill growth (0–100). Completing or rating steps triggers dynamic path re-sequencing. |
 
-- Node.js 18+ and npm
-- A free [Supabase](https://supabase.com) account and project
-- A free [Google AI Studio](https://aistudio.google.com) API key (for Gemini)
-- The [Supabase CLI](https://supabase.com/docs/guides/cli) (`npm install -g supabase`)
+---
 
-## Local Setup
-
-1. **Clone the repo**
-
-   ```bash
-   git clone https://github.com/<your-username>/personalized-learning-path-recommender.git
-   cd personalized-learning-path-recommender
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Fill in `.env` with your Supabase project values (Dashboard → Settings → API):
-
-   ```
-   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-   VITE_SUPABASE_ANON_KEY=sb_publishable_...
-   ```
-
-4. **Link the Supabase CLI to your project**
-
-   ```bash
-   npx supabase login
-   npx supabase link --project-ref your-project-ref
-   ```
-
-5. **Apply database migrations**
-
-   ```bash
-   npx supabase db push
-   ```
-
-6. **Set your Gemini API key as a Supabase secret** (used by edge functions)
-
-   ```bash
-   npx supabase secrets set GEMINI_API_KEY=your-gemini-key
-   ```
-
-7. **Deploy edge functions to your Supabase project**
-
-   ```bash
-   npx supabase functions deploy
-   ```
-
-8. **Run the frontend locally**
-
-   ```bash
-   npm run dev
-   ```
-
-   Open [http://localhost:5173](http://localhost:5173).
-
-## Project Structure
+## 🏗️ Architecture & Tech Stack
 
 ```
-src/
-  components/    UI components (intake, path, profile, dashboard, tutor)
-  hooks/         Data hooks (profile, path, progress, tutor)
-  lib/           Supabase client, shared helpers
-supabase/
-  migrations/    SQL schema migrations
-  functions/     Edge functions (profiling, retrieval, path generation,
-                 explanation, tutor chat, progress updates)
-scripts/         Catalog seeding and embedding generation scripts
-docs/            Project brief, scope, architecture, progress tracker
+[React 19 + Tailwind + Recharts]
+               │  (Supabase Auth & JWT)
+               ▼
+[Supabase Edge Functions (Deno Runtime)]
+ ├── parse-profile     ──> Gemini Structured JSON Output
+ ├── retrieve-courses  ──> pgvector Cosine Search + Skill Gap Engine
+ ├── generate-path     ──> Prerequisite DAG Topological Sort + Milestones
+ ├── explain-step      ──> Zero-Shot Grounded Rationales
+ └── tutor-chat        ──> Context-Bound Interactive Tutor
+               │
+               ▼
+[Supabase Postgres DB (pgvector + Row-Level Security)]
 ```
 
-Full breakdown in `docs/ARCHITECTURE.md`.
+---
 
-## Seeding the Course Catalog
+## ⚡ Quick Start
 
+### 1. Clone & Install
 ```bash
+git clone https://github.com/<your-username>/personalized-learning-path-recommender.git
+cd personalized-learning-path-recommender
+npm install
+```
+
+### 2. Configure Environment
+Copy `.env.example` to `.env` and fill in your Supabase credentials:
+```env
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 3. Deploy & Seed (One-time)
+```bash
+# Push DB schema & HNSW indexes
+npx supabase db push
+
+# Set Gemini API key for Edge Functions
+npx supabase secrets set GEMINI_API_KEY=your-gemini-key
+
+# Deploy edge functions
+npx supabase functions deploy
+
+# Seed catalog & precompute embeddings
 node scripts/seed-catalog.js
 node scripts/embed-catalog.js
 ```
 
-(Run after migrations are applied — populates the `courses` table and
-generates embeddings for semantic search.)
-
-## End-to-End QA
-
-With all migrations applied, functions deployed, and the catalog seeded +
-embedded, run:
-
+### 4. Run Locally
 ```bash
+npm run dev
+```
+Open **[http://localhost:5173](http://localhost:5173)** in your browser.
+
+---
+
+## 🧪 Verification & End-to-End QA
+
+Run the automated test suite to verify Supabase Auth, database RLS, and all 6 Gemini Edge Functions:
+```bash
+# Run comprehensive E2E QA
 node scripts/qa-e2e.js
+
+# Run quick auth check
+node scripts/auth-smoke.js
 ```
 
-This creates a throwaway test user, signs in, and exercises every edge
-function (`parse-profile` → `generate-path` → `explain-step` → `tutor-chat`
-→ `retrieve-courses`) with pass/fail checks. Note: on the Gemini free tier,
-the daily request quota is small — if you see `Gemini API returned 429`,
-wait for the quota reset and re-run.
+To create a clean submission ZIP archive:
+```bash
+npm run package
+```
 
-## Development Notes
+---
 
-This project was built solo, agent-assisted, over a 6-day sprint
-(Aug 22–27). See `docs/PROGRESS.md` for the full phase-by-phase build log
-and commit history for development progression.
+## 📚 Deep Dive Documentation
 
-Architecture patterns (edge function structure, AI provider abstraction)
-were referenced from the open-source
-[AI Learning Path Generator](https://github.com/Enterprise-DNA-OS/ai-learning-path-generator)
-by Enterprise DNA (MIT licensed). Core recommendation logic, path-generation
-algorithm, explanation prompts, and the adaptive feedback loop were built
-independently for this project.
+For detailed architectural diagrams, algorithm specifications, and development logs, see:
+- 📐 **[System Design & Algorithms](file:///docs/SYSTEM_DESIGN.md)** — Topological sort, vector math, grounding prompts & formulas.
+- 🏛️ **[Architecture Overview](file:///docs/ARCHITECTURE.md)** — Folder layout, database schemas, and conventions.
+- 🎯 **[Project Brief & Criteria](file:///docs/PROJECT_BRIEF.md)** — Hackathon problem statement and deliverables.
+- 📋 **[Progress Tracker & QA Log](file:///docs/PROGRESS.md)** — Comprehensive record of all 12 completed phases.
 
-## License
+---
 
-MIT
+## 📄 License & Attribution
+
+- Built under the **MIT License**.
+- Architectural edge function abstractions inspired by the open-source [AI Learning Path Generator](https://github.com/Enterprise-DNA-OS/ai-learning-path-generator) by Enterprise DNA.
