@@ -87,9 +87,12 @@ Deno.serve(async (req) => {
     if (stepsError) throw stepsError
     if (!steps?.length) return json({ explanations: {} })
 
-    // Generate + persist rationales sequentially (free-tier friendly).
+    // Generate + persist rationales sequentially, pacing calls to stay under
+    // free-tier RPM limits (13 steps x ~5s is well inside the wall-clock cap).
     const explanations = {}
-    for (const step of steps) {
+    for (let i = 0; i < steps.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 5000))
+      const step = steps[i]
       const { lines } = collectStepFacts(step)
       const result = await chat({
         messages: [

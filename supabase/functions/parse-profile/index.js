@@ -90,6 +90,13 @@ Deno.serve(async (req) => {
     const authed = createAuthedClient(req)
     const admin = createAuthedClient(req, { serviceRole: true })
 
+    // Require a signed-in caller up front — RLS needs auth.uid() and the row
+    // below stores user_id explicitly.
+    const {
+      data: { user },
+    } = await authed.auth.getUser()
+    if (!user) return json({ error: 'Not authenticated' }, 401)
+
     // Map completed-course titles -> ids.
     const completedCourseIds = await mapCourseTitlesToIds(
       admin,
@@ -105,7 +112,7 @@ Deno.serve(async (req) => {
     if (existing.error) throw existing.error
 
     const row = {
-      user_id: (await authed.auth.getUser()).data.user?.id,
+      user_id: user.id,
       raw_intake_text: message,
       goals: profile.goals,
       experience_level: profile.experience_level,

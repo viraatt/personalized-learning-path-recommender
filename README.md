@@ -30,14 +30,14 @@ See `docs/SCOPE.md` for what is explicitly in and out of scope.
 
 | Layer | Choice |
 |---|---|
-| Frontend | Vite + React 18 + JavaScript |
+| Frontend | Vite + React 19 + JavaScript |
 | UI | shadcn/ui (Radix UI) + Tailwind CSS |
 | Charts | Recharts |
-| State | Zustand + TanStack Query |
+| State | Local React state (no global store needed) |
 | Backend | Supabase Edge Functions (Deno) |
 | Database | Supabase Postgres + pgvector |
 | Auth | Supabase Auth |
-| LLM + Embeddings | Google Gemini 2.5 Flash + `text-embedding-004` |
+| LLM + Embeddings | Google Gemini Flash + `gemini-embedding-001` (768-dim) |
 
 Full architecture details in `docs/ARCHITECTURE.md`.
 
@@ -113,11 +113,9 @@ Full architecture details in `docs/ARCHITECTURE.md`.
 
 ```
 src/
-  components/    UI components (intake, path, dashboard, tutor)
-  hooks/         Data-fetching hooks (profile, path, progress)
+  components/    UI components (intake, path, profile, dashboard, tutor)
+  hooks/         Data hooks (profile, path, progress, tutor)
   lib/           Supabase client, shared helpers
-  pages/         Route-level pages
-  store/         Zustand stores
 supabase/
   migrations/    SQL schema migrations
   functions/     Edge functions (profiling, retrieval, path generation,
@@ -137,6 +135,21 @@ node scripts/embed-catalog.js
 
 (Run after migrations are applied — populates the `courses` table and
 generates embeddings for semantic search.)
+
+## End-to-End QA
+
+With all migrations applied, functions deployed, and the catalog seeded +
+embedded, run:
+
+```bash
+node scripts/qa-e2e.js
+```
+
+This creates a throwaway test user, signs in, and exercises every edge
+function (`parse-profile` → `generate-path` → `explain-step` → `tutor-chat`
+→ `retrieve-courses`) with pass/fail checks. Note: on the Gemini free tier,
+the daily request quota is small — if you see `Gemini API returned 429`,
+wait for the quota reset and re-run.
 
 ## Development Notes
 

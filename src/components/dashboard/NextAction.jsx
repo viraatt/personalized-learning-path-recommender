@@ -6,7 +6,8 @@ import { getPath } from '@/hooks/path/getPath'
  * incomplete step of the latest path, or a nudge to create one.
  */
 export default function NextAction() {
-  const [path, setPath] = useState(null)
+  // undefined = still loading; null = loaded, no saved path.
+  const [path, setPath] = useState(undefined)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function NextAction() {
     }
   }, [])
 
-  const loading = !failed && path === null
+  const loading = !failed && path === undefined
 
   const nextStep = path?.steps?.find((s) => s.status !== 'complete')
 

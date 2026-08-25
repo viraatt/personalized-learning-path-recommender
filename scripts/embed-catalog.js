@@ -23,7 +23,8 @@ if (!supabaseUrl || !serviceRoleKey || !geminiApiKey) {
 
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-const EMBED_MODEL = 'text-embedding-004'
+const EMBED_MODEL = 'gemini-embedding-001'
+const EMBED_DIMS = 768
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 
 /**
@@ -34,7 +35,11 @@ async function embedText(text) {
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: EMBED_MODEL, content: { parts: [{ text }] } }),
+    body: JSON.stringify({
+      model: EMBED_MODEL,
+      content: { parts: [{ text }] },
+      outputDimensionality: EMBED_DIMS,
+    }),
   })
   const data = await response.json()
   if (!response.ok) {

@@ -16,7 +16,8 @@ const STATUS_STYLES = {
  * cards (9.2) + progress controls and adaptive re-sequencing (10.2/10.3).
  */
 export default function PathTimeline({ onChanged }) {
-  const [path, setPath] = useState(null)
+  // undefined = still loading; null = loaded, no saved path.
+  const [path, setPath] = useState(undefined)
   const [failed, setFailed] = useState(false)
   const [rationales, setRationales] = useState({})
   const [explainState, setExplainState] = useState('idle') // idle|loading|error
@@ -46,7 +47,7 @@ export default function PathTimeline({ onChanged }) {
     }
   }, [])
 
-  const loading = !failed && path === null
+  const loading = !failed && path === undefined
 
   function handleExplain() {
     if (!path || explainState === 'loading') return

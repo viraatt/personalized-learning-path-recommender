@@ -1,0 +1,152 @@
+import { useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+
+/**
+ * Map auth errors to actionable messages. Supabase Auth rate-limits signups
+ * per project (free tier) — a bare 429 reads as "broken", so explain it.
+ */
+function describeAuthError(message) {
+  const raw = String(message ?? '')
+  if (/rate|429|too many/i.test(raw)) {
+    return (
+      'Too many attempts — Supabase limits new sign-ups per hour on the ' +
+      'free tier. Wait a little while and try again.'
+    )
+  }
+  return raw || 'Authentication failed'
+}
+
+/**
+ * AuthCard — minimal email/password sign-in + sign-up.
+ *
+ * The whole backend is RLS-scoped to auth.uid() and every edge function
+ * requires the caller's JWT, so nothing works until the user is signed in.
+ * On success supabase-js persists the session and useSession() flips the app
+ * into its signed-in view automatically — no callback wiring needed.
+ */
+export default function AuthCard() {
+  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [status, setStatus] = useState('idle') // idle | loading
+  const [error, setError] = useState(null)
+  const [notice, setNotice] = useState(null)
+
+  function toggleMode() {
+    setMode((m) => (m === 'signin' ? 'signup' : 'signin'))
+    setError(null)
+    setNotice(null)
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    if (status === 'loading') return
+    setStatus('loading')
+    setError(null)
+    setNotice(null)
+
+    const result =
+      mode === 'signup'
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password })
+
+    const authError = result.error
+
+    if (authError) {
+      setError(describeAuthError(authError.message))
+      setStatus('idle')
+      return
+    }
+
+    // Sign-up succeeded but no session means the project requires email
+    // confirmation — tell the user instead of silently doing nothing.
+    if (mode === 'signup' && !result.data?.session) {
+      setNotice(
+        'Account created! If email confirmation is required, check your ' +
+          'inbox and confirm, then sign in below.'
+      )
+    }
+    // Otherwise the session change drives the UI; nothing else to do here.
+    setStatus('idle')
+  }
+
+  return (
+    <section
+      aria-label="Sign in"
+      className="mx-auto mt-10 w-full max-w-md rounded-lg border bg-background p-6"
+    >
+      <h1 className="text-xl font-semibold tracking-tight">
+        {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+      </h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Sign in so your learning path, progress, and mastery stay with you.
+      </p>
+
+      <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted-foreground">Email</span>
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={status === 'loading'}
+            className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            placeholder="you@example.com"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted-foreground">Password</span>
+          <input
+            type="password"
+            required
+            minLength={6}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={status === 'loading'}
+            className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            placeholder="At least 6 characters"
+          />
+        </label>
+
+        {error && (
+          <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
+
+        {notice && (
+          <p role="status" className="rounded-md bg-accent px-3 py-2 text-sm text-accent-foreground">
+            {notice}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-50"
+        >
+          {status === 'loading'
+            ? 'Working…'
+            : mode === 'signin'
+              ? 'Sign in'
+              : 'Sign up'}
+        </button>
+      </form>
+
+      <button
+        type="button"
+        onClick={toggleMode}
+        disabled={status === 'loading'}
+        className="mt-4 text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+      >
+        {mode === 'signin'
+          ? "New here? Create an account"
+          : 'Already have an account? Sign in'}
+      </button>
+    </section>
+  )
+}

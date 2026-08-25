@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { askTutor } from '@/hooks/tutor/askTutor'
 import { cn } from '@/lib/utils'
+import { describeError } from '@/lib/errorMessage'
 
 /**
  * TutorChat — grounded Q&A widget (10.1). Same message-list pattern as
@@ -28,7 +29,7 @@ export default function TutorChat() {
       .catch((error) => {
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', content: `Tutor error: ${error.message}`, isError: true },
+          { role: 'assistant', content: `Tutor error: ${describeError(error)}`, isError: true },
         ])
         setStatus('error')
       })

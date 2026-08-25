@@ -1,0 +1,35 @@
+Deploying Function: embed-goal
+Uploading asset (embed-goal): supabase/functions/embed-goal/index.js
+Uploading asset (embed-goal): supabase/functions/_shared/ai.js
+Uploading asset (embed-goal): supabase/functions/_shared/cors.js
+Deploying Function: explain-step
+Uploading asset (explain-step): supabase/functions/explain-step/index.js
+Uploading asset (explain-step): supabase/functions/_shared/grounding.js
+Uploading asset (explain-step): supabase/functions/_shared/supabase.js
+Uploading asset (explain-step): supabase/functions/_shared/ai.js
+Uploading asset (explain-step): supabase/functions/_shared/cors.js
+Deploying Function: generate-path
+Uploading asset (generate-path): supabase/functions/generate-path/index.js
+Uploading asset (generate-path): supabase/functions/_shared/pathGraph.js
+Uploading asset (generate-path): supabase/functions/_shared/supabase.js
+Uploading asset (generate-path): supabase/functions/_shared/ai.js
+Uploading asset (generate-path): supabase/functions/_shared/cors.js
+Deploying Function: parse-profile
+Uploading asset (parse-profile): supabase/functions/parse-profile/index.js
+Uploading asset (parse-profile): supabase/functions/_shared/supabase.js
+Uploading asset (parse-profile): supabase/functions/_shared/ai.js
+Uploading asset (parse-profile): supabase/functions/_shared/cors.js
+Deploying Function: retrieve-courses
+Uploading asset (retrieve-courses): supabase/functions/retrieve-courses/index.js
+Uploading asset (retrieve-courses): supabase/functions/_shared/skillGap.js
+Uploading asset (retrieve-courses): supabase/functions/_shared/supabase.js
+Uploading asset (retrieve-courses): supabase/functions/_shared/ai.js
+Uploading asset (retrieve-courses): supabase/functions/_shared/cors.js
+Deploying Function: tutor-chat
+Uploading asset (tutor-chat): supabase/functions/tutor-chat/index.js
+Uploading asset (tutor-chat): supabase/functions/_shared/grounding.js
+Uploading asset (tutor-chat): supabase/functions/_shared/supabase.js
+Uploading asset (tutor-chat): supabase/functions/_shared/ai.js
+Uploading asset (tutor-chat): supabase/functions/_shared/cors.js
+Deployed Functions on project zkmvefkxiaxgsinrbpdm: embed-goal, explain-step, generate-path, parse-profile, retrieve-courses, tutor-chat
+You can inspect your deployment in the Dashboard: https://supabase.com/dashboard/project/zkmvefkxiaxgsinrbpdm/functions

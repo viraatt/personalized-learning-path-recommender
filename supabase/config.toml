@@ -4,6 +4,25 @@
 # working directory name when running `supabase init`.
 project_id = "personalized-learning-path-recommender"
 
+# Functions are plain JS (index.js), not TypeScript.
+[functions.parse-profile]
+entrypoint = "functions/parse-profile/index.js"
+
+[functions.embed-goal]
+entrypoint = "functions/embed-goal/index.js"
+
+[functions.retrieve-courses]
+entrypoint = "functions/retrieve-courses/index.js"
+
+[functions.generate-path]
+entrypoint = "functions/generate-path/index.js"
+
+[functions.explain-step]
+entrypoint = "functions/explain-step/index.js"
+
+[functions.tutor-chat]
+entrypoint = "functions/tutor-chat/index.js"
+
 [api]
 enabled = true
 # Port to use for the API URL.

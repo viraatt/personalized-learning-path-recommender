@@ -9,14 +9,15 @@
 // Exposed:
 //   chat({ model?, messages, responseSchema?, maxTokens?, temperature? })
 //     -> { content }  (parsed object when responseSchema is provided)
-//   embed({ text })   -> number[]  (768-dim, text-embedding-004)
+//   embed({ text })   -> number[]  (768-dim, gemini-embedding-001)
 //
 // Includes basic retry/backoff for Gemini free-tier rate limits.
 
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
-const DEFAULT_MODEL = 'gemini-2.5-flash'
-const EMBED_MODEL = 'text-embedding-004'
-const MAX_ATTEMPTS = 4
+const DEFAULT_MODEL = 'gemini-3.6-flash' // gemini-2.5-flash was retired for new API keys
+const EMBED_MODEL = 'gemini-embedding-001' // text-embedding-004 was retired; same 768-dim output via outputDimensionality
+const EMBED_DIMS = 768
+const MAX_ATTEMPTS = 6
 
 function apiKey() {
   return Deno.env.get('GEMINI_API_KEY') || ''
@@ -98,7 +99,11 @@ export async function embed(text) {
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: EMBED_MODEL, content: { parts: [{ text }] } }),
+    body: JSON.stringify({
+      model: EMBED_MODEL,
+      content: { parts: [{ text }] },
+      outputDimensionality: EMBED_DIMS,
+    }),
   })
 
   const data = await response.json()

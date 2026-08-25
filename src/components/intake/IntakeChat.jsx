@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { describeError } from '@/lib/errorMessage'
 import { submitIntake } from '@/hooks/profile/submitIntake'
 import { getProfile } from '@/hooks/profile/getProfile'
 import ProfileDisplay from '@/components/profile/ProfileDisplay'
@@ -63,7 +64,7 @@ export default function IntakeChat() {
           ...prev,
           {
             role: 'assistant',
-            content: `Something went wrong: ${error.message}`,
+            content: `Something went wrong: ${describeError(error)}`,
             isError: true,
           },
         ])
