@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
+import SplashScreen from '@/components/SplashScreen'
 import { useSession } from '@/hooks/auth/useSession'
 import AuthCard from '@/components/auth/AuthCard'
+import Logo from '@/components/Logo'
 import Landing from '@/pages/Landing'
 import ChatPage from '@/pages/ChatPage'
 import DashboardPage from '@/pages/DashboardPage'
@@ -23,9 +25,7 @@ function Shell({ children, session, theme, toggleTheme }) {
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
-            <NavLink to="/" className="text-sm font-bold tracking-tight">
-              learn<span className="text-primary">path</span>
-            </NavLink>
+            <Logo />
             <nav aria-label="Primary" className="flex items-center gap-1">
               {NAV_ITEMS.map((item) => (
                 <NavLink
@@ -81,7 +81,7 @@ function Shell({ children, session, theme, toggleTheme }) {
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 pt-8">{children}</main>
 
       <footer className="border-t py-4 text-center text-xs text-muted-foreground">
-        personalized learning path recommender
+        CogniClimb
       </footer>
     </div>
   )
@@ -116,6 +116,13 @@ export default function App() {
     }
   })
 
+  // Splash screen handling – show only on first load
+  const [showSplash, setShowSplash] = useState(true)
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 8000) // match animation length
+    return () => clearTimeout(timer)
+  }, [])
+
   useEffect(() => {
     try {
       const root = document.documentElement
@@ -146,37 +153,43 @@ export default function App() {
   }
 
   return (
-    <Shell session={session} theme={theme} toggleTheme={toggleTheme}>
-      <Routes>
-        {/* Landing is public — marketing before login. */}
-        <Route path="/" element={<Landing />} />
-        {/* App routes require an account. */}
-        <Route
-          path="/chat"
-          element={
-            <RequireAuth>
-              <ChatPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth>
-              <DashboardPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <RequireAuth>
-              <ProfilePage />
-            </RequireAuth>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Shell>
+    <>
+      {showSplash ? (
+        <SplashScreen />
+      ) : (
+        <Shell session={session} theme={theme} toggleTheme={toggleTheme}>
+          <Routes>
+            {/* Landing is public — marketing before login. */}
+            <Route path="/" element={<Landing />} />
+            {/* App routes require an account. */}
+            <Route
+              path="/chat"
+              element={
+                <RequireAuth>
+                  <ChatPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <RequireAuth>
+                  <DashboardPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <RequireAuth>
+                  <ProfilePage />
+                </RequireAuth>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Shell>
+      )}
+    </>
   )
 }

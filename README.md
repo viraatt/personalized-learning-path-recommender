@@ -1,4 +1,4 @@
-# 🧭 Pathfinder — AI Personalized Learning Path Recommender
+# 🧭 CogniClimb — AI-Powered Personalized Learning Path Recommender
 
 > An intelligent, graph-sequenced, adaptive learning assistant that turns free-form career goals into structured, prerequisite-validated, explainable roadmaps.
 
@@ -10,11 +10,11 @@
 
 ---
 
-## 💡 What is Pathfinder?
+## 💡 What is CogniClimb?
 
 Modern course catalogs contain thousands of disparate offerings, but self-directed learners face severe decision paralysis around **what to learn next** and **in what prerequisite order**.
 
-**Pathfinder** solves this by pairing **Large Language Models (Google Gemini)**, **Vector Similarity Search (`pgvector`)**, and **Graph Theory (Directed Acyclic Graph Topological Sort)**:
+**CogniClimb** solves this by pairing **Large Language Models (Google Gemini)**, **Vector Similarity Search (`pgvector`)**, and **Graph Theory (Directed Acyclic Graph Topological Sort)**:
 1. **Conversational Intake**: Extracts structured background, target roles, and skill profiles from free-form chat.
 2. **Semantic Course Retrieval**: Projects learner goals into 768-dimensional vector space to find relevant catalog courses via HNSW cosine distance search.
 3. **Prerequisite DAG Sequencing**: Automatically injects missing prerequisites and topological-sorts courses into logically ordered milestone checkpoints.
@@ -26,7 +26,7 @@ Modern course catalogs contain thousands of disparate offerings, but self-direct
 
 ## 🏛️ Architecture & System Blueprint
 
-Pathfinder is architected as a modern serverless application utilizing **React 19** on the client and **Supabase Edge Functions (Deno runtime)** backed by **PostgreSQL with `pgvector`** for storage and vector retrieval.
+CogniClimb is architected as a modern serverless application utilizing **React 19** on the client and **Supabase Edge Functions (Deno runtime)** backed by **PostgreSQL with `pgvector`** for storage and vector retrieval.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -86,8 +86,8 @@ Follow these steps to set up, configure, seed, and run the project locally.
 ### Step 1: Clone Repository & Install Dependencies
 
 ```bash
-git clone https://github.com/viraatt/personalized-learning-path-recommender.git
-cd personalized-learning-path-recommender
+git clone https://github.com/viraatt/cogniclimb.git
+cd cogniclimb
 npm install
 ```
 
@@ -163,13 +163,13 @@ Start the Vite development server:
 npm run dev
 ```
 
-Open your browser at **[http://localhost:5173](http://localhost:5173)** to start using Pathfinder!
+Open your browser at **[http://localhost:5173](http://localhost:5173)** to start using CogniClimb!
 
 ---
 
 ## 🧪 Automated Testing & Verification
 
-Pathfinder comes with a test suite covering authentication, database RLS, and end-to-end Edge Function pipelines:
+CogniClimb comes with a test suite covering authentication, database RLS, and end-to-end Edge Function pipelines:
 
 ```bash
 # Run comprehensive End-to-End QA (validates profile parsing, DAG generation, explainability & tutor)
@@ -197,7 +197,7 @@ npm run package
 ## 📁 Repository Directory Structure
 
 ```
-personalized-learning-path-recommender/
+cogniclimb/
 ├── docs/
 │   ├── ARCHITECTURE.md          # System architecture, stack & conventions
 │   ├── SYSTEM_DESIGN.md         # Detailed algorithms, DAG & vector formulas

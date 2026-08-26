@@ -68,7 +68,7 @@ export async function chat({
 
       if (response.status === 429 || response.status >= 500) {
         lastError = new Error(`Gemini API returned status ${response.status}`)
-        if (attempt < maxAttempts) {
+        if (attempt < MAX_ATTEMPTS) {
           await sleep(Math.min(1000 * 2 ** (attempt - 1), 3000))
           continue
         }
@@ -87,7 +87,7 @@ export async function chat({
       return text
     } catch (err) {
       lastError = err
-      if (attempt < maxAttempts && (err.name === 'TimeoutError' || err.status === 429)) {
+      if (attempt < MAX_ATTEMPTS && (err.name === 'TimeoutError' || err.status === 429)) {
         await sleep(1500)
         continue
       }
