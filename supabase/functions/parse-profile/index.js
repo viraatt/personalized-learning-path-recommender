@@ -55,10 +55,30 @@ async function mapCourseTitlesToIds(supabase, titles) {
   if (!Array.isArray(titles) || titles.length === 0) return []
   const { data: courses, error } = await supabase
     .from('courses')
-    .select('id, title')
-    .in('title', [...new Set(titles)])
-  if (error) throw new Error(`Failed to resolve course ids: ${error.message}`)
-  return (courses ?? []).map((c) => c.id)
+    .select('id, title, skills')
+  if (error || !courses) return []
+
+  const normalized = titles.map((t) => String(t).toLowerCase().trim())
+  const matchedIds = new Set()
+
+  for (const course of courses) {
+    const courseTitle = course.title.toLowerCase()
+    const courseSkills = (course.skills || []).map((s) => String(s).toLowerCase())
+
+    for (const token of normalized) {
+      if (
+        courseTitle === token ||
+        courseTitle.includes(token) ||
+        token.includes(courseTitle) ||
+        courseSkills.includes(token)
+      ) {
+        matchedIds.add(course.id)
+        break
+      }
+    }
+  }
+
+  return [...matchedIds]
 }
 
 const json = (body, status = 200) =>
@@ -71,11 +91,24 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    const body = await req.json()
+    const body = await req.json().catch(() => ({}))
     const message = String(body?.message ?? '').trim()
     if (!message) return json({ error: 'Message is required' }, 400)
 
-    // Parse profile from the intake text.
+    // Clients: authed (user-owned writes, RLS) + service-role (catalog lookup).
+    const authed = createAuthedClient(req)
+    const admin = createAuthedClient(req, { serviceRole: true })
+
+    // 1. Verify user authentication FIRST before initiating LLM call.
+    const {
+      data: { user },
+      error: authError,
+    } = await authed.auth.getUser()
+    if (authError || !user) {
+      return json({ error: 'Not authenticated. Please sign in.' }, 401)
+    }
+
+    // 2. Parse profile from the intake text via Gemini.
     const parsed = await chat({
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -86,24 +119,13 @@ Deno.serve(async (req) => {
     })
     const profile = validateProfile(parsed)
 
-    // Clients: authed (user-owned writes, RLS) + service-role (catalog lookup).
-    const authed = createAuthedClient(req)
-    const admin = createAuthedClient(req, { serviceRole: true })
-
-    // Require a signed-in caller up front — RLS needs auth.uid() and the row
-    // below stores user_id explicitly.
-    const {
-      data: { user },
-    } = await authed.auth.getUser()
-    if (!user) return json({ error: 'Not authenticated' }, 401)
-
-    // Map completed-course titles -> ids.
+    // 3. Map completed-course titles -> ids.
     const completedCourseIds = await mapCourseTitlesToIds(
       admin,
       profile.completed_courses
     )
 
-    // Upsert the user's profile (one row per user).
+    // 4. Upsert the user's profile (one row per user).
     const existing = await authed
       .from('learner_profiles')
       .select('id')
@@ -129,7 +151,14 @@ Deno.serve(async (req) => {
     if (result.error) throw result.error
 
     const saved = Array.isArray(result.data) ? result.data[0] : result.data
-    return json({ profile: { ...profile, id: saved?.id, raw_intake_text: message } })
+    return json({
+      profile: {
+        ...profile,
+        id: saved?.id,
+        raw_intake_text: message,
+        completed_course_ids: completedCourseIds,
+      },
+    })
   } catch (err) {
     console.error('parse-profile failed:', err)
     return json({ error: err?.message ?? 'Profile parsing failed' }, 500)

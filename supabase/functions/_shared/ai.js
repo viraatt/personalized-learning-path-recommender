@@ -17,7 +17,7 @@ const API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const DEFAULT_MODEL = 'gemini-3.5-flash'
 const EMBED_MODEL = 'gemini-embedding-001' // 768-dim output via outputDimensionality
 const EMBED_DIMS = 768
-const MAX_ATTEMPTS = 6
+const MAX_ATTEMPTS = 3
 
 function apiKey() {
   return Deno.env.get('GEMINI_API_KEY') || ''
@@ -58,31 +58,41 @@ export async function chat({
 
   let lastError
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(20000),
+      })
 
-    if (response.status === 429 || response.status >= 500) {
-      lastError = new Error(`Gemini API returned ${response.status}`)
-      if (attempt < MAX_ATTEMPTS) {
-        await sleep(2 ** attempt * 1000)
+      if (response.status === 429 || response.status >= 500) {
+        lastError = new Error(`Gemini API returned status ${response.status}`)
+        if (attempt < maxAttempts) {
+          await sleep(Math.min(1000 * 2 ** (attempt - 1), 3000))
+          continue
+        }
+        throw lastError
+      }
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`Gemini error ${response.status}: ${data?.error?.message ?? 'unknown'}`)
+      }
+
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+      if (!text) throw new Error('Gemini returned an empty response')
+
+      if (responseSchema) return parseJson(text)
+      return text
+    } catch (err) {
+      lastError = err
+      if (attempt < maxAttempts && (err.name === 'TimeoutError' || err.status === 429)) {
+        await sleep(1500)
         continue
       }
-      throw lastError
+      throw err
     }
-
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(`Gemini error ${response.status}: ${data?.error?.message ?? 'unknown'}`)
-    }
-
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    if (!text) throw new Error('Gemini returned an empty response')
-
-    if (responseSchema) return parseJson(text)
-    return text
   }
   throw lastError
 }
