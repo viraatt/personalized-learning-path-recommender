@@ -119,7 +119,7 @@ export default function App() {
   // Splash screen handling – show only on first load
   const [showSplash, setShowSplash] = useState(true)
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 8000) // match animation length
+    const timer = setTimeout(() => setShowSplash(false), 1100) // match animation length (1100ms)
     return () => clearTimeout(timer)
   }, [])
 
@@ -155,7 +155,7 @@ export default function App() {
   return (
     <>
       {showSplash ? (
-        <SplashScreen />
+        <SplashScreen onDone={() => setShowSplash(false)} />
       ) : (
         <Shell session={session} theme={theme} toggleTheme={toggleTheme}>
           <Routes>

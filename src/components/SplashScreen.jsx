@@ -11,7 +11,7 @@ export default function SplashScreen({ onDone }) {
     const timer = setTimeout(() => {
       setVisible(false);
       if (onDone) onDone();
-    }, 8200); // slightly longer than the last animation (8s)
+    }, 1100);
     return () => clearTimeout(timer);
   }, [onDone]);
 
@@ -50,7 +50,7 @@ export default function SplashScreen({ onDone }) {
           strokeDasharray="600"
           strokeDashoffset="600"
         >
-          <animate attributeName="stroke-dashoffset" values="600;0" dur="2s" fill="freeze" begin="0.5s" />
+          <animate attributeName="stroke-dashoffset" values="600;0" dur="0.3s" fill="freeze" begin="0.05s" />
         </path>
 
         {/* Inner hexagon */}
@@ -62,7 +62,7 @@ export default function SplashScreen({ onDone }) {
           strokeDasharray="400"
           strokeDashoffset="400"
         >
-          <animate attributeName="stroke-dashoffset" values="400;0" dur="1.5s" fill="freeze" begin="1.5s" />
+          <animate attributeName="stroke-dashoffset" values="400;0" dur="0.25s" fill="freeze" begin="0.15s" />
         </path>
 
         {/* Climbing maze path */}
@@ -77,12 +77,12 @@ export default function SplashScreen({ onDone }) {
           strokeDasharray="500"
           strokeDashoffset="500"
         >
-          <animate attributeName="stroke-dashoffset" values="500;0" dur="3s" fill="freeze" begin="2s" />
+          <animate attributeName="stroke-dashoffset" values="500;0" dur="0.35s" fill="freeze" begin="0.25s" />
         </path>
 
         {/* Connection paths */}
         <g opacity="0">
-          <animate attributeName="opacity" values="0;1" dur="0.5s" fill="freeze" begin="3s" />
+          <animate attributeName="opacity" values="0;1" dur="0.15s" fill="freeze" begin="0.4s" />
           <line x1="180" y1="120" x2="140" y2="100" stroke="#475569" strokeWidth="2" strokeDasharray="5 3" />
           <line x1="320" y1="120" x2="360" y2="100" stroke="#475569" strokeWidth="2" strokeDasharray="5 3" />
           <line x1="180" y1="200" x2="140" y2="220" stroke="#475569" strokeWidth="2" strokeDasharray="5 3" />
@@ -91,16 +91,16 @@ export default function SplashScreen({ onDone }) {
 
         {/* Node points */}
         <circle cx="250" cy="200" r="0" fill="#06b6d4" filter="url(#splashNeonGlow)">
-          <animate attributeName="r" values="0;6;4" dur="0.7s" fill="freeze" begin="2.5s" />
+          <animate attributeName="r" values="0;6;4" dur="0.15s" fill="freeze" begin="0.3s" />
         </circle>
         <circle cx="220" cy="170" r="0" fill="#0ea5e9">
-          <animate attributeName="r" values="0;5;3" dur="0.7s" fill="freeze" begin="3s" />
+          <animate attributeName="r" values="0;5;3" dur="0.15s" fill="freeze" begin="0.38s" />
         </circle>
         <circle cx="280" cy="140" r="0" fill="#6366f1">
-          <animate attributeName="r" values="0;5;3" dur="0.7s" fill="freeze" begin="3.5s" />
+          <animate attributeName="r" values="0;5;3" dur="0.15s" fill="freeze" begin="0.46s" />
         </circle>
         <circle cx="250" cy="80" r="0" fill="#8b5cf6" filter="url(#splashNeonGlow)">
-          <animate attributeName="r" values="0;8;6" dur="0.8s" fill="freeze" begin="4s" />
+          <animate attributeName="r" values="0;8;6" dur="0.18s" fill="freeze" begin="0.54s" />
         </circle>
 
         {/* Title */}
@@ -114,27 +114,27 @@ export default function SplashScreen({ onDone }) {
           opacity="0"
         >
           COGNICLIMB
-          <animate attributeName="opacity" values="0;1" dur="0.5s" fill="freeze" begin="4.5s" />
-          <animate attributeName="letter-spacing" values="10;3" dur="1s" fill="freeze" begin="4.5s" />
+          <animate attributeName="opacity" values="0;1" dur="0.2s" fill="freeze" begin="0.58s" />
+          <animate attributeName="letter-spacing" values="10;3" dur="0.25s" fill="freeze" begin="0.58s" />
         </text>
 
         {/* Underline */}
         <line x1="150" y1="315" x2="350" y2="315" stroke="url(#splashHexGrad)" strokeWidth="3" strokeDasharray="200" strokeDashoffset="200">
-          <animate attributeName="stroke-dashoffset" values="200;0" dur="1s" fill="freeze" begin="5s" />
+          <animate attributeName="stroke-dashoffset" values="200;0" dur="0.2s" fill="freeze" begin="0.68s" />
         </line>
 
         {/* Code decoration */}
         <text x="250" y="340" fontFamily="JetBrains Mono, monospace" fontSize="13" fill="#64748b" textAnchor="middle" opacity="0">
           [ LEARNING_PATH_INITIALIZED ]
-          <animate attributeName="opacity" values="0;1" dur="0.5s" fill="freeze" begin="5.5s" />
+          <animate attributeName="opacity" values="0;1" dur="0.15s" fill="freeze" begin="0.75s" />
         </text>
 
         {/* Loading bar */}
         <g opacity="0">
-          <animate attributeName="opacity" values="0;1" dur="0.3s" fill="freeze" begin="5.8s" />
+          <animate attributeName="opacity" values="0;1" dur="0.1s" fill="freeze" begin="0.8s" />
           <rect x="175" y="355" width="150" height="8" rx="4" fill="#1e293b" />
           <rect x="175" y="355" width="0" height="8" rx="4" fill="url(#splashHexGrad)">
-            <animate attributeName="width" values="0;150" dur="2s" fill="freeze" begin="6s" />
+            <animate attributeName="width" values="0;150" dur="0.28s" fill="freeze" begin="0.82s" />
           </rect>
         </g>
       </svg>
