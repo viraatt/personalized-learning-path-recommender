@@ -54,7 +54,10 @@ export default function AuthCard() {
         ? await supabase.auth.signUp({
             email,
             password,
-            options: { data: { full_name: fullName.trim() || email.split('@')[0] } },
+            options: {
+              data: { full_name: fullName.trim() || email.split('@')[0] },
+              emailRedirectTo: `${window.location.origin}/`,
+            },
           })
         : await supabase.auth.signInWithPassword({ email, password })
 

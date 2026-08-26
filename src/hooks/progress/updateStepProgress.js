@@ -13,10 +13,10 @@ const MAX_SCORE = 100
  *
  * @returns {{ mastery: Array<{skill_name, mastery_score}> }} updated scores
  */
-export async function updateStepProgress({ stepId, skills = [], status, rating }) {
+export async function updateStepProgress({ stepId, skills = [], status, rating, previousStatus }) {
   const patch = {}
   if (status) patch.status = status
-  if (rating != null) patch.rating = rating
+  if (rating !== undefined) patch.rating = rating
 
   const { error: updateError } = await supabase
     .from('path_steps')
@@ -26,14 +26,23 @@ export async function updateStepProgress({ stepId, skills = [], status, rating }
 
   if (skills.length === 0) return { mastery: [] }
 
-  const gained =
-    (status === 'complete' ? COMPLETE_BONUS : 0) +
-    (rating != null ? rating * RATING_PER_STAR : 0)
-  if (gained === 0) return { mastery: [] }
-
   const { data: auth } = await supabase.auth.getUser()
   const userId = auth?.user?.id
   if (!userId) throw new Error('Not signed in')
+
+  // Calculate delta
+  let delta = 0
+  if (status === 'complete' && previousStatus !== 'complete') {
+    delta += COMPLETE_BONUS
+  } else if (previousStatus === 'complete' && status && status !== 'complete') {
+    delta -= COMPLETE_BONUS
+  }
+
+  if (rating != null && previousStatus === undefined) {
+    delta += rating * RATING_PER_STAR
+  }
+
+  if (delta === 0) return { mastery: [] }
 
   const { data: existingRows, error: fetchError } = await supabase
     .from('skill_mastery')
@@ -49,7 +58,7 @@ export async function updateStepProgress({ stepId, skills = [], status, rating }
   const updates = skills.map((skill) => ({
     user_id: userId,
     skill_name: skill,
-    mastery_score: Math.min(MAX_SCORE, (current[skill] ?? 0) + gained),
+    mastery_score: Math.max(0, Math.min(MAX_SCORE, (current[skill] ?? 0) + delta)),
   }))
 
   const { data: saved, error: upsertError } = await supabase
