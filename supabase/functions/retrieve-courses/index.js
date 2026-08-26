@@ -44,7 +44,15 @@ Deno.serve(async (req) => {
       return json({ error: 'No saved profile and no goal text provided' }, 400)
     }
 
-    const queryText = [message, profile?.goals].filter(Boolean).join('. ')
+    const queryParts = [
+      message,
+      profile?.target_role ? `Target Role: ${profile.target_role}` : null,
+      profile?.goals ? `Goal: ${profile.goals}` : null,
+      profile?.interests?.length ? `Interests: ${profile.interests.join(', ')}` : null,
+      profile?.experience_level ? `Experience Level: ${profile.experience_level}` : null,
+    ].filter(Boolean)
+
+    const queryText = queryParts.join('. ')
     const queryEmbedding = await embed(queryText)
     if (!Array.isArray(queryEmbedding)) throw new Error('No embedding returned')
 
