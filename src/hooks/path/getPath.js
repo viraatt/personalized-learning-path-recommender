@@ -12,7 +12,7 @@ export async function getPath() {
       `id, generated_at,
        path_steps (
          id, course_id, order_index, milestone_group, status, rating, rationale_text,
-         courses ( title, description, difficulty, duration_hours, skills )
+         courses ( title, description, difficulty, duration_hours, skills, resource_type, deliverable, pass_criteria )
        )`
     )
     .order('generated_at', { ascending: false })

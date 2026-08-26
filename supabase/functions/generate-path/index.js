@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
 
     // Fetch full catalog & edges for graph resolution
     const [catalogResult, edgesResult] = await Promise.all([
-      admin.from('courses').select('id, title, description, domain, difficulty, duration_hours, skills'),
+      admin.from('courses').select('id, title, description, domain, difficulty, duration_hours, skills, resource_type, deliverable, pass_criteria'),
       admin.from('prerequisites').select('course_id, prerequisite_course_id'),
     ])
     if (catalogResult.error) throw catalogResult.error
@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
       // Fallback: AI synthesis using catalog selection
       console.log(`[generate-path] Max similarity ${maxSimilarity.toFixed(2)} is low; invoking AI course selection synthesis...`)
       
-      const catalogSummary = catalog.map((c) => `- "${c.title}" (${c.domain}, ${c.difficulty}): ${c.description}`).join('\n')
+      const catalogSummary = catalog.map((c) => `- "${c.title}" (${c.domain}, ${c.difficulty}, ${c.resource_type ?? 'course'}): ${c.description}`).join('\n')
       const synthesisPrompt = `The learner wants to achieve:
 Stated Goal / Message: "${message || profile?.goals}"
 Target Role: "${profile?.target_role || 'Not specified'}"
@@ -237,6 +237,9 @@ Use EXACT titles from the catalog only. Do not invent course titles.`
       difficulty: entry.course.difficulty,
       duration_hours: entry.course.duration_hours,
       skills: entry.course.skills,
+      resource_type: entry.course.resource_type ?? 'course',
+      deliverable: entry.course.deliverable ?? null,
+      pass_criteria: entry.course.pass_criteria ?? null,
       source: entry.source,
       order_index: index + 1,
       milestone_group: entry.milestone_group,

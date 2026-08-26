@@ -1352,6 +1352,223 @@ const courses = [
       "lottie",
       "css-animations"
     ]
+  },
+  {
+    "title": "2D Arcade Game Project",
+    "description": "Build and ship a complete 2D arcade game in Unity with sprite animations, custom physics, audio triggers, and scoring UI.",
+    "domain": "game-dev",
+    "difficulty": "intermediate",
+    "duration_hours": 20,
+    "skills": [
+      "unity",
+      "c#",
+      "game-design",
+      "prototyping"
+    ],
+    "resource_type": "project",
+    "deliverable": "Playable WebGL build and GitHub repo containing the full Unity project assets, scripts, and level configurations."
+  },
+  {
+    "title": "Game Math & Physics Skills Assessment",
+    "description": "Timed coding assessment evaluating your mastery of 3D vector transformations, matrix operations, and rigid-body collision math.",
+    "domain": "game-dev",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "game-math",
+      "linear-algebra",
+      "vectors",
+      "game-physics"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Achieve at least 80% on vector projection algorithms and implement a functioning bounding-box collision solver."
+  },
+  {
+    "title": "Full-Stack E-Commerce Platform Project",
+    "description": "Develop a production-grade full-stack web application featuring React, server-side rendering, secure authentication, and payment checkout flow.",
+    "domain": "web-dev",
+    "difficulty": "advanced",
+    "duration_hours": 25,
+    "skills": [
+      "react",
+      "nextjs",
+      "full-stack",
+      "backend-apis",
+      "type-safety"
+    ],
+    "resource_type": "project",
+    "deliverable": "Deployed full-stack web application with responsive UI, integrated relational database, and end-to-end checkout flow."
+  },
+  {
+    "title": "React & TypeScript Competency Assessment",
+    "description": "Comprehensive practical test evaluating modern React component architecture, custom hooks, and strict TypeScript types.",
+    "domain": "web-dev",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "react",
+      "typescript",
+      "hooks",
+      "components"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Pass 100% of automated test suites without TypeScript compiler warnings or state synchronization errors."
+  },
+  {
+    "title": "Customer Churn Predictive Modeling Project",
+    "description": "Execute an end-to-end data science project: Exploratory Data Analysis, feature engineering, cross-validated model tuning, and API serving.",
+    "domain": "data-science",
+    "difficulty": "advanced",
+    "duration_hours": 20,
+    "skills": [
+      "pandas",
+      "scikit-learn",
+      "feature-engineering",
+      "ml-project",
+      "model-deployment"
+    ],
+    "resource_type": "project",
+    "deliverable": "Jupyter notebook with EDA visualizations, trained model artifact, and serialized model serving via FastAPI endpoint."
+  },
+  {
+    "title": "Statistical Analysis & Inference Assessment",
+    "description": "Rigorous practical assessment covering hypothesis testing, distributions, confidence intervals, and regression diagnostics.",
+    "domain": "data-science",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "statistics",
+      "probability",
+      "data-cleaning",
+      "pandas"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Correctly formulate and execute 4 hypothesis tests on real-world datasets with justifiable statistical conclusions."
+  },
+  {
+    "title": "High-Availability Multi-Tier Cloud Deployment Project",
+    "description": "Architect and deploy an enterprise cloud infrastructure using Infrastructure as Code (Terraform) across multiple availability zones.",
+    "domain": "cloud",
+    "difficulty": "advanced",
+    "duration_hours": 22,
+    "skills": [
+      "aws",
+      "terraform",
+      "iac",
+      "cloud-architecture",
+      "vpc"
+    ],
+    "resource_type": "project",
+    "deliverable": "Documented Terraform codebase provisioning VPC, auto-scaling container services, load balancers, and managed RDS."
+  },
+  {
+    "title": "Kubernetes & Cloud Orchestration Assessment",
+    "description": "Hands-on cluster configuration evaluation testing pod scheduling, ingress controller setups, and rolling update strategies.",
+    "domain": "cloud",
+    "difficulty": "intermediate",
+    "duration_hours": 4,
+    "skills": [
+      "kubernetes",
+      "k8s",
+      "helm",
+      "containers",
+      "orchestration"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Successfully configure multi-replica Kubernetes deployments with zero-downtime rolling upgrades and ingress SSL termination."
+  },
+  {
+    "title": "Enterprise GitOps CI/CD Pipeline Project",
+    "description": "Build an automated continuous integration and delivery pipeline with automated container scanning, linting, and staging releases.",
+    "domain": "devops",
+    "difficulty": "intermediate",
+    "duration_hours": 18,
+    "skills": [
+      "ci-cd",
+      "github-actions",
+      "docker",
+      "devsecops",
+      "pipelines"
+    ],
+    "resource_type": "project",
+    "deliverable": "Working GitHub Actions workflow pipeline with automated security audits, image tagging, and automated Kubernetes staging deploy."
+  },
+  {
+    "title": "Linux Systems & Shell Automation Assessment",
+    "description": "Real-time terminal scenario assessment testing shell scripting, process triage, network diagnostics, and permission management.",
+    "domain": "devops",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "linux",
+      "bash",
+      "shell-scripting",
+      "automation"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Resolve 5 broken system configurations and write idempotent Bash automation scripts passing verification test harnesses."
+  },
+  {
+    "title": "Cross-Platform Fitness Tracking Mobile App Project",
+    "description": "Design and build a complete cross-platform mobile application with offline-first data caching, push notifications, and charts.",
+    "domain": "mobile-dev",
+    "difficulty": "intermediate",
+    "duration_hours": 24,
+    "skills": [
+      "flutter",
+      "react-native",
+      "mobile",
+      "state-management",
+      "cross-platform"
+    ],
+    "resource_type": "project",
+    "deliverable": "Installable mobile application build (APK / iOS archive) with responsive layout, offline persistence, and smooth animations."
+  },
+  {
+    "title": "Mobile Architecture & State Management Assessment",
+    "description": "Practical coding exam assessing MVVM pattern decoupling, reactive state containers, and unit testing on mobile platforms.",
+    "domain": "mobile-dev",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "mvvm",
+      "clean-architecture",
+      "swiftui",
+      "jetpack-compose"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Implement clean MVVM state separation and dependency injection with at least 85% test coverage on business logic."
+  },
+  {
+    "title": "Autonomous RAG Knowledge Agent Project",
+    "description": "Build an end-to-end Retrieval-Augmented Generation agent capable of searching external documentation, verifying sources, and answering queries.",
+    "domain": "ai-engineering",
+    "difficulty": "advanced",
+    "duration_hours": 20,
+    "skills": [
+      "llm",
+      "langchain",
+      "rag",
+      "ai-agents",
+      "prompt-engineering"
+    ],
+    "resource_type": "project",
+    "deliverable": "Production-ready agent service with vector database integration, citation metadata generation, and latency benchmarking."
+  },
+  {
+    "title": "LLM Alignment & Prompt Engineering Assessment",
+    "description": "Evaluation of structured JSON schema generation, adversarial prompt injection mitigation, and few-shot prompt optimization.",
+    "domain": "ai-engineering",
+    "difficulty": "intermediate",
+    "duration_hours": 3,
+    "skills": [
+      "prompt-engineering",
+      "ai-safety",
+      "llm",
+      "transformers"
+    ],
+    "resource_type": "assessment",
+    "pass_criteria": "Successfully resist 5 prompt injection attacks and guarantee 100% compliant structured JSON output under diverse edge-case inputs."
   }
 ]
 
@@ -1629,6 +1846,64 @@ const prerequisiteEdges = {
   ],
   "Motion Design & Micro-animations": [
     "Figma for Designers & Developers"
+  ],
+  "2D Arcade Game Project": [
+    "Unity Game Engine Fundamentals",
+    "C# for Unity Developers"
+  ],
+  "Game Math & Physics Skills Assessment": [
+    "Game Mathematics & Linear Algebra",
+    "Game Physics & Collision Detection"
+  ],
+  "Full-Stack E-Commerce Platform Project": [
+    "React Development",
+    "TypeScript Fundamentals",
+    "Full-Stack Web Development"
+  ],
+  "React & TypeScript Competency Assessment": [
+    "React Development",
+    "TypeScript Fundamentals"
+  ],
+  "Customer Churn Predictive Modeling Project": [
+    "Data Analysis with Pandas",
+    "Machine Learning Foundations",
+    "Feature Engineering & Selection"
+  ],
+  "Statistical Analysis & Inference Assessment": [
+    "Python Fundamentals",
+    "Statistics for Data Science"
+  ],
+  "High-Availability Multi-Tier Cloud Deployment Project": [
+    "Cloud Basics with AWS",
+    "Infrastructure as Code with Terraform"
+  ],
+  "Kubernetes & Cloud Orchestration Assessment": [
+    "Docker & Containerization",
+    "Kubernetes & Container Orchestration"
+  ],
+  "Enterprise GitOps CI/CD Pipeline Project": [
+    "Docker & Containerization",
+    "CI/CD Pipelines with GitHub Actions"
+  ],
+  "Linux Systems & Shell Automation Assessment": [
+    "Linux for Developers",
+    "Bash Scripting & Automation"
+  ],
+  "Cross-Platform Fitness Tracking Mobile App Project": [
+    "Flutter Cross-Platform Development"
+  ],
+  "Mobile Architecture & State Management Assessment": [
+    "SwiftUI for iOS",
+    "Mobile App Architecture"
+  ],
+  "Autonomous RAG Knowledge Agent Project": [
+    "LLM APIs & Prompt Engineering",
+    "AI Agents & Tool Use",
+    "LangChain & LlamaIndex"
+  ],
+  "LLM Alignment & Prompt Engineering Assessment": [
+    "LLM APIs & Prompt Engineering",
+    "AI Safety & Alignment"
   ]
 }
 
@@ -1659,6 +1934,9 @@ for (const course of courses) {
     difficulty: course.difficulty,
     duration_hours: course.duration_hours,
     skills: course.skills,
+    resource_type: course.resource_type ?? 'course',
+    deliverable: course.deliverable ?? null,
+    pass_criteria: course.pass_criteria ?? null,
   }
 
   const { data, error } = existingCourse

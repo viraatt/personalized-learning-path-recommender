@@ -266,10 +266,23 @@ export default function PathTimeline({ onChanged }) {
                       )}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-sm font-medium">
                             {step.order_index}. {step.courses?.title ?? 'Course'}
                           </h3>
+                          {step.courses?.resource_type === 'project' ? (
+                            <span className="inline-flex items-center gap-1 rounded bg-indigo-500/10 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                              🔨 Project
+                            </span>
+                          ) : step.courses?.resource_type === 'assessment' ? (
+                            <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                              📝 Assessment
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground border border-border/40">
+                              📚 Course
+                            </span>
+                          )}
                           {!isUnlocked && (
                             <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                               🔒 Locked
@@ -291,6 +304,20 @@ export default function PathTimeline({ onChanged }) {
                       {step.courses?.description && (
                         <p className="mt-1 text-sm text-muted-foreground">
                           {step.courses.description}
+                        </p>
+                      )}
+
+                      {step.courses?.deliverable && (
+                        <p className="mt-1.5 rounded bg-muted/40 px-2 py-1 text-xs text-muted-foreground border border-border/30">
+                          <span className="font-medium text-foreground">Deliverable: </span>
+                          {step.courses.deliverable}
+                        </p>
+                      )}
+
+                      {step.courses?.pass_criteria && (
+                        <p className="mt-1.5 rounded bg-muted/40 px-2 py-1 text-xs text-muted-foreground border border-border/30">
+                          <span className="font-medium text-foreground">Pass Criteria: </span>
+                          {step.courses.pass_criteria}
                         </p>
                       )}
 

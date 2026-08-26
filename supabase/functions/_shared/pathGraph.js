@@ -119,12 +119,38 @@ export function resolvePathOrder(
 
 /**
  * 7.3 — Chunk an ordered path into milestone groups.
+ * If a project or assessment exists within a milestone, place it last in that
+ * milestone's step list as a "cap".
  * Returns entries with `milestone_group` starting at 1.
  */
 export function groupIntoMilestones(entries = [], groupSize = 3) {
   const size = Math.max(1, Math.floor(groupSize))
-  return entries.map((entry, index) => ({
-    ...entry,
-    milestone_group: Math.floor(index / size) + 1,
-  }))
+  const chunks = []
+
+  for (let i = 0; i < entries.length; i += size) {
+    const chunk = entries.slice(i, i + size)
+    const capIndex = chunk.findIndex((entry) => {
+      const type = entry?.course?.resource_type ?? entry?.resource_type
+      return type === 'project' || type === 'assessment'
+    })
+
+    if (capIndex !== -1 && capIndex !== chunk.length - 1) {
+      const [capItem] = chunk.splice(capIndex, 1)
+      chunk.push(capItem)
+    }
+
+    chunks.push(chunk)
+  }
+
+  const result = []
+  chunks.forEach((chunk, groupIdx) => {
+    chunk.forEach((entry) => {
+      result.push({
+        ...entry,
+        milestone_group: groupIdx + 1,
+      })
+    })
+  })
+
+  return result
 }
