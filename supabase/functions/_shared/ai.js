@@ -16,8 +16,8 @@
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const GROK_API_BASE = 'https://api.x.ai/v1'
-const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
-const DEFAULT_GROK_MODEL = 'grok-2-latest'
+const DEFAULT_GEMINI_MODEL = 'gemini-3.7-flash'
+const DEFAULT_GROK_MODEL = 'grok-2-1212'
 const EMBED_MODEL = 'gemini-embedding-001'
 const EMBED_DIMS = 768
 const MAX_ATTEMPTS = 3
@@ -108,14 +108,9 @@ export async function chat({
   temperature = 0.2,
   model = DEFAULT_GEMINI_MODEL,
 } = {}) {
-  const apiKey = getGeminiKey()
+  const primaryKey = getGeminiKey()
+  const backupKey = getGeminiBackupKey()
   const hasGrok = Boolean(getGrokKey())
-
-  // If no Gemini key but Grok is available, go straight to Grok
-  if (!apiKey && hasGrok) {
-    console.warn('[aiProvider] GEMINI_API_KEY missing, using Grok')
-    return await chatWithGrok({ messages, responseSchema, maxOutputTokens, temperature })
-  }
 
   const contents = messages.map((m) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
@@ -128,71 +123,57 @@ export async function chat({
     generationConfig.responseSchema = responseSchema
   }
 
-  const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`
-  const body = { contents, generationConfig }
+  const tryGemini = async (key, modelName) => {
+    if (!key) throw new Error('No Gemini key provided')
+    const url = `${GEMINI_API_BASE}/models/${modelName}:generateContent?key=${key}`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents, generationConfig }),
+      signal: AbortSignal.timeout(20000),
+    })
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      const err = new Error(errorData?.error?.message ?? `Status ${response.status}`)
+      err.status = response.status
+      err.code = errorData?.error?.status
+      throw err
+    }
+
+    const data = await response.json()
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    if (!text) throw new Error('Gemini returned an empty response')
+    if (responseSchema) return parseJson(text)
+    return text
+  }
+
+  // 1. Try Gemini with active keys and fast fallback models
+  const modelsToTry = [DEFAULT_GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']
   let lastError
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(20000),
-      })
 
-      if (response.status === 429 || response.status === 403 || response.status >= 500) {
-        const errorData = await response.json().catch(() => ({}))
-        const isQuota = response.status === 429 || response.status === 403 || errorData?.error?.status === 'RESOURCE_EXHAUSTED'
-        
-        lastError = new Error(`Gemini ${response.status}: ${errorData?.error?.message ?? 'rate limited / quota'}`)
-        
-        if (isQuota && hasGrok) {
-          console.warn(`[aiProvider] Gemini quota limit (${response.status}). Switching chat to Grok fallback...`)
-          return await chatWithGrok({ messages, responseSchema, maxOutputTokens, temperature })
-        }
-
-        if (attempt < MAX_ATTEMPTS) {
-          await sleep(Math.min(1000 * 2 ** (attempt - 1), 3000))
-          continue
-        }
-      } else {
-        const data = await response.json()
-        if (!response.ok) {
-          throw new Error(`Gemini error ${response.status}: ${data?.error?.message ?? 'unknown'}`)
-        }
-
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-        if (!text) throw new Error('Gemini returned an empty response')
-
-        if (responseSchema) return parseJson(text)
-        return text
-      }
-    } catch (err) {
-      lastError = err
-      if (hasGrok && (err.name === 'TimeoutError' || err.status === 429 || err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED'))) {
-        console.warn(`[aiProvider] Gemini chat failed (${err.message}). Trying Grok fallback...`)
-        try {
-          return await chatWithGrok({ messages, responseSchema, maxOutputTokens, temperature })
-        } catch (grokErr) {
-          console.error('[aiProvider] Grok fallback also failed:', grokErr)
-        }
-      }
-
-      if (attempt < MAX_ATTEMPTS && (err.name === 'TimeoutError' || err.status === 429)) {
-        await sleep(1500)
-        continue
+  for (const k of [backupKey, primaryKey].filter(Boolean)) {
+    for (const m of modelsToTry) {
+      try {
+        return await tryGemini(k, m)
+      } catch (err) {
+        lastError = err
+        console.warn(`[aiProvider] Gemini ${m} returned ${err.status ?? err.code} (${err.message}). Trying next fallback model...`)
       }
     }
   }
 
-  // Final fallback to Grok if available before throwing
+  // 2. Try Grok fallback if configured
   if (hasGrok) {
-    console.warn('[aiProvider] Gemini attempts exhausted. Final attempt with Grok...')
-    return await chatWithGrok({ messages, responseSchema, maxOutputTokens, temperature })
+    console.warn('[aiProvider] Gemini keys unavailable or exhausted. Trying Grok fallback...')
+    try {
+      return await chatWithGrok({ messages, responseSchema, maxOutputTokens, temperature })
+    } catch (grokErr) {
+      console.error('[aiProvider] Grok fallback also failed:', grokErr.message)
+    }
   }
 
-  throw lastError ?? new Error('Chat failed on all providers')
+  throw lastError ?? new Error('Chat failed on all configured AI providers')
 }
 
 // ---------------------------------------------------------------------------
