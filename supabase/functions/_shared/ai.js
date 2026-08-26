@@ -16,7 +16,7 @@
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const GROK_API_BASE = 'https://api.x.ai/v1'
-const DEFAULT_GEMINI_MODEL = 'gemini-3.7-flash'
+const DEFAULT_GEMINI_MODEL = 'gemini-flash-lite-latest'
 const DEFAULT_GROK_MODEL = 'grok-2-1212'
 const EMBED_MODEL = 'gemini-embedding-001'
 const EMBED_DIMS = 768
@@ -82,7 +82,7 @@ async function chatWithGrok({
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(15000),
   })
 
   const data = await response.json()
@@ -130,7 +130,7 @@ export async function chat({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents, generationConfig }),
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(8000),
     })
 
     if (!response.ok) {
@@ -148,11 +148,16 @@ export async function chat({
     return text
   }
 
-  // 1. Try Gemini with active keys and fast fallback models
-  const modelsToTry = [DEFAULT_GEMINI_MODEL, 'gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']
+  // 1. Try fast, reliable Gemini models in order of speed
+  const modelsToTry = [
+    DEFAULT_GEMINI_MODEL,
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini-3.6-flash',
+  ]
   let lastError
 
-  for (const k of [backupKey, primaryKey].filter(Boolean)) {
+  for (const k of [primaryKey, backupKey].filter(Boolean)) {
     for (const m of modelsToTry) {
       try {
         return await tryGemini(k, m)

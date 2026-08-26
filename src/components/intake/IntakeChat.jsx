@@ -8,7 +8,7 @@ import { getProfile } from '@/hooks/profile/getProfile'
 import { regeneratePath } from '@/hooks/progress/regeneratePath'
 import ProfileDisplay from '@/components/profile/ProfileDisplay'
 
-const TIMEOUT_MS = 35000
+const TIMEOUT_MS = 60000
 
 export default function IntakeChat({ onProfileUpdated }) {
   const [draft, setDraft] = useState('')
