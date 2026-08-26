@@ -31,6 +31,7 @@ export default function AuthCard() {
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
   const [status, setStatus] = useState('idle') // idle | loading
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
@@ -50,7 +51,11 @@ export default function AuthCard() {
 
     const result =
       mode === 'signup'
-        ? await supabase.auth.signUp({ email, password })
+        ? await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: fullName.trim() || email.split('@')[0] } },
+          })
         : await supabase.auth.signInWithPassword({ email, password })
 
     const authError = result.error
@@ -102,6 +107,20 @@ export default function AuthCard() {
               placeholder="you@example.com"
             />
           </label>
+
+          {mode === 'signup' && (
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-muted-foreground">Full name</span>
+              <Input
+                type="text"
+                autoComplete="name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                disabled={status === 'loading'}
+                placeholder="Your name (optional)"
+              />
+            </label>
+          )}
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Password</span>
